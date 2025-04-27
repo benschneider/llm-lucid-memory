@@ -1,0 +1,2 @@
+[console_scripts]
+lucid-memory = lucid_memory.gui:main

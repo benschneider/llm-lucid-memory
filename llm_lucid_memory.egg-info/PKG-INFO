@@ -1,3 +1,35 @@
+Metadata-Version: 2.4
+Name: llm-lucid-memory
+Version: 0.1.3
+Summary: Lucid Memory - Modular reasoning brain for small LLMs
+Home-page: https://github.com/benschneider/llm-lucid-memory
+Author: Ben Schneider
+Author-email: benh.schneider@gmail.com
+Project-URL: Source, https://github.com/benschneider/llm-lucid-memory
+Project-URL: Issue Tracker, https://github.com/benschneider/llm-lucid-memory/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: requests
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license-file
+Dynamic: project-url
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
 [![License](https://img.shields.io/github/license/benschneider/llm-lucid-memory)](LICENSE)
 
 [![Advanced Reasoning Project](https://img.shields.io/badge/advanced%20reasoning-in%20progress-blue)]()
@@ -65,24 +97,6 @@ User Question -> ReflectiveRetriever -> Select Relevant Memories -> ChainOfDraft
 
 ```
 
-## 🧠 Growing Lucid Memory: Recursive Understanding and Connection Graph
-
-We are designing Lucid Memory to not just store facts but to **grow understanding recursively**:
-
-1. **High-Level Overview**  
-   Every raw text or document is first digested into a summary, key concepts, and open follow-up questions.
-
-2. **Recursive Exploration**  
-   Follow-up questions are then digested individually to deepen understanding where needed, expanding the memory tree.
-
-3. **Structured Memory Growth**  
-   Each new memory is stored as a `MemoryNode`, annotated with relationships, follow-up links, and key topics.
-
-4. **Embedding and Connection Graph**  
-   Memory summaries and concepts are embedded into vector space.  
-   Connections between memories are formed based on semantic similarity and logical dependencies, resulting in a dynamic, growing memory graph.
-
----
 
 
 ## 🧪 Quick Start
@@ -94,7 +108,7 @@ pip install -r requirements.txt
 
 Start a UI to configure and start a Proxy Server for LLM interaction:
 ```bash 
-python -m lucid_memory.gui
+python start.py
 ```
 
 ### For development:
@@ -126,6 +140,18 @@ Drafted Answer:
 	- Initiate TLS handshake
 	- Proceed with secured HTTP handling
 
+
+## 🌱 What's Coming Next?
+
+| Feature                               | Status    |
+|:--------------------------------------|:----------|
+| ChainOfDraftEngine (parallel reasoning chains) | 🔜 Planned |
+| Monte Carlo Chain Voting for Reliable Reasoning | 🔜 Research & Planned |
+| MemoryNode versioning                 | 🔜 Future  |
+| Graph-based retrieval paths           | 🔜 Future  |
+| Sleep-time memory growth (dream ingestion) | 🔜 Future  |
+| Fine-tuning LLMs for memory reasoning  | 🔜 Future  |
+
 ## 🧠 Advanced Research Directions
 
 ### 🧠 Future Optimization: Monte Carlo Chain Voting for Memory Refinement
@@ -144,30 +170,6 @@ This approach allows the memory system to grow smarter naturally, even without d
 
 Stay tuned as we integrate these innovations into future versions! 🚀
 
-
-## 🛣️ v0.2.0 Roadmap
-
-**Upcoming Features and Improvements:**
-
-| Feature | Status |
-|:---|:---|
-| ChainOfDraftEngine for multi-path logical drafting | 🔜 In Progress |
-| Monte Carlo Chain Voting for output reliability | 🔜 Researching |
-| Memory digest via direct LLM connection (Ollama/LMStudio) | ✅ Part 1 Done |
-| Proxy Server separation for chat handling only | ✅ Done |
-| Smart GUI for managing memory, loading contexts, and proxy control | ✅ Done |
-| Server health check before digestion | 🔜 Planned |
-| Batch context ingestion support | 🔜 Planned |
-| Memory browsing improvements (filter/search) | 🔜 Planned |
-| Config-driven setup via `proxy_config.json` | ✅ Done |
-| MemoryNode versioning                 | 🔜 Future  |
-| Graph-based retrieval paths           | 🔜 Future  |
-| Sleep-time memory growth (dream ingestion) | 🔜 Future  |
-| Fine-tuning LLMs for memory reasoning  | 🔜 Future  |
-
-
-Stay tuned — next update will bring Lucid Memory closer to fully modular, self-optimizing small-brain architecture! 🧠🚀
-
 ## 📜 License
 
 Apache 2.0 — free for commercial and research use with attribution.
@@ -184,15 +186,12 @@ Helping small models think big - the way real minds do. 🚀
 
 ## 🔌 How to Use with Local LLMs (Ollama, LMStudio, etc.)
 
-- Start your local LLM server (e.g., Ollama, LMStudio)
-- Edit `lucid_memory/proxy_config.json` to configure:
-  - LLM Backend URL (e.g., http://localhost:11434/v1/chat/completions)
-  - LLM Model Name (e.g., mistral, phi3)
-- Launch the Lucid Memory GUI via:
-  ```bash
-  python -m lucid_memory.gui
-  ```
-- Start the Proxy Server using the GUI
+- Start your local LLM server (e.g., Ollama)
+- Open `start.py` and configure:
+  - Backend URL (e.g., http://localhost:11434/v1/chat/completions)
+  - Model Name (e.g., mistral, phi4)
+- Launch Proxy Server from the UI
+- Point your client to `http://localhost:{your_proxy_port}/chat`
 - Enjoy memory-enhanced, chain-of-draft smart reasoning!
 
 ## 🚧 Current Status and Next Steps
@@ -204,11 +203,6 @@ Lucid Memory is actively under development.
 - ReflectiveRetriever operational for smart memory selection.
 - Proxy server connects to local LLMs like Ollama and LMStudio, injecting smart memory context.
 - First end-to-end smart chain-of-draft flow tested successfully.
-
-This approach aims to create an AI memory system that:
-- Reflects real understanding, not just surface facts.
-- Grows organically through recursive thinking.
-- Can retrieve, reason, and refine knowledge dynamically over time.
 
 **Next Major Implementations:**
 - Launch ChainOfDraftEngine to structure logical answer chaining.
@@ -232,7 +226,7 @@ llm-lucid-memory/
 │   ├── memory_graph.py   # In-memory brain managing MemoryNodes
 │   ├── retriever.py      # ReflectiveRetriever (smart retrieval)
 │   ├── proxy_server.py   # Proxy server bridging app ↔ smart LLM context
-│   └── gui.py             # GUI launcher for proxy server, memory loading, and configuration
+│   └── start.py          # UI launcher for proxy server and config
 ├── examples/            # Demos and pipelines
 │   ├── simple_digest_demo.py
 │   ├── full_pipeline_demo.py

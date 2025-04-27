@@ -1,43 +1,78 @@
-from typing import List, Optional
+import os
+import json
+import requests
 from lucid_memory.memory_node import MemoryNode
+
+DEBUG = True
 
 class Digestor:
     def __init__(self):
-        pass
+        config_path = os.path.join(os.path.dirname(__file__), "proxy_config.json")
+        if not os.path.exists(config_path):
+            raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
-    def digest(self, raw_text: str, node_id: str):
-        # Extract reasoning paths: look for lines with comments
-        reasoning_paths = []
-        for line in raw_text.splitlines():
-            line = line.strip()
-            if line.startswith("#"):
-                reasoning_paths.append(line.lstrip("#").strip())
-            elif "#" in line:
-                reasoning_paths.append(line.split("#", 1)[-1].strip())
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
 
-        if not reasoning_paths:
-            reasoning_paths = ["General description of the function."]
+        self.llm_url = config.get("backend_url")
+        self.model_name = config.get("model_name")
 
-        return MemoryNode(
-            id=node_id,
-            raw=raw_text,
-            summary=raw_text.splitlines()[0],  # For now, first line as rough summary
-            reasoning_paths=reasoning_paths,
-            tags=self.auto_tag(raw_text)
-    )
+        if not self.llm_url or not self.model_name:
+            raise ValueError("Configuration must contain 'backend_url' and 'model_name'.")
 
-    def _summarize(self, text: str) -> str:
-        return text.split(".")[0] if "." in text else text
+    def digest(self, raw_text: str, node_id: str) -> MemoryNode:
+        return self._digest_with_llm(raw_text, node_id)
 
-    def _extract_reasoning_paths(self, text: str) -> List[str]:
-        return [line.strip() for line in text.split(".") if line.strip()]
+    def _digest_with_llm(self, raw_text: str, node_id: str) -> MemoryNode:
+        prompt = f"""
+You are a memory digestor.
 
-    def auto_tag(self, text: str) -> List[str]:
-        keywords = []
-        if "server" in text.lower():
-            keywords.append("server")
-        if "memory" in text.lower():
-            keywords.append("memory")
-        if "network" in text.lower():
-            keywords.append("network")
-        return keywords
+Your goal is to deeply understand technical project documents, designs, or code, and produce a compact structured knowledge summary.
+
+Given the following raw text, perform:
+
+- Summarize the main purpose and core ideas in 1-2 sentences.
+- Extract 5-10 key concepts, mechanisms, or steps that are central to the system's function or design.
+- Identify any open questions, missing details, or follow-up topics that should be explored for complete understanding.
+
+Return ONLY valid JSON with fields:
+  - summary (string)
+  - key_concepts (list of short sentences)
+  - follow_up_items (list of questions or topics to explore)
+
+IMPORTANT: Return ONLY valid JSON. No markdown formatting, no explanations, no prose. 
+Your entire response must start with '{{' and end with '}}' — only pure JSON allowed.
+
+TEXT:
+\"\"\"
+{raw_text}
+\"\"\"
+"""
+
+        payload = {
+            "model": self.model_name,
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "stream": False
+        }
+
+        response = requests.post(self.llm_url, json=payload)
+        if response.status_code != 200:
+            raise RuntimeError(f"LLM digest failed: {response.text}")
+
+        data = response.json()
+        try:
+            content = data["choices"][0]["message"]["content"]
+            if DEBUG:
+                print("LLM RAW RESPONSE:", content)
+            parsed = json.loads(content)
+            return MemoryNode(
+                id=node_id,
+                raw=raw_text,
+                summary=parsed.get("summary", "Summary missing"),
+                reasoning_paths=parsed.get("reasoning_paths", []),
+                tags=parsed.get("tags", [])
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to parse LLM response: {e}")

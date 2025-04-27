@@ -30,4 +30,9 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     python_requires='>=3.8',
+    entry_points={
+        'console_scripts': [
+            'lucid-memory=lucid_memory.gui:main',
+        ],
+    },
 )
