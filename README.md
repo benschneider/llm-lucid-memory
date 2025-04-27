@@ -66,15 +66,15 @@ Question:
 “How does the server start and accept secure connections?”
 
 Memory Retrieval:
-	•	Memory 1: Start server (open socket, bind port, accept requests)
-	•	Memory 2: Handle TLS (perform handshake, secure channel)
+	- Memory 1: Start server (open socket, bind port, accept requests)
+	- Memory 2: Handle TLS (perform handshake, secure channel)
 
 Drafted Answer:
-	•	Open socket
-	•	Bind port
-	•	Accept connection
-	•	Initiate TLS handshake
-	•	Proceed with secured HTTP handling
+	- Open socket
+	- Bind port
+	- Accept connection
+	- Initiate TLS handshake
+	- Proceed with secured HTTP handling
 
 
 ## 🌱 What's Coming Next?
@@ -94,15 +94,16 @@ Apache 2.0 — free for commercial and research use with attribution.
 ## ✨ Vision
 
 We are building a modular reasoning brain for LLMs:
-	•	Digest structured memories
-	•	Reflectively retrieve knowledge
-	•	Reason flexibly beyond context limits
-	•	Grow smarter over time
+	- Digest structured memories
+	- Reflectively retrieve knowledge
+	- Reason flexibly beyond context limits
+	- Grow smarter over time
 
 Helping small models think big — the way real minds do. 🚀
 
-## Project Structure
+## 📦 Project Structure
 
+```plaintext
 llm-lucid-memory/
 ├── README.md          # Project overview
 ├── LICENSE            # Apache 2.0 License
@@ -122,5 +123,4 @@ llm-lucid-memory/
 │   └── test_retriever.py
 ├── requirements.txt   # Lightweight requirements
 └── setup.py           # Optional pip packaging
-
-
+```
