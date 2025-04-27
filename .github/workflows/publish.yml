@@ -26,11 +26,11 @@ jobs:
     - name: Build package
       run: python -m build
 
-    # IMPORTANT:
-    # Currently configured to publish to TestPyPI for safe testing.
-    # To publish to real PyPI later, change repository-url to:
+    # IMPORTANT: Currently configured to publish to PyPI.
     # https://upload.pypi.org/legacy/
-    - name: Publish package to TestPyPI
+    # https://test.pypi.org/legacy/
+    
+    - name: Publish package to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        repository-url: https://test.pypi.org/legacy/
+        repository-url: https://upload.pypi.org/legacy/
