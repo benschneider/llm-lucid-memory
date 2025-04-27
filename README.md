@@ -2,6 +2,24 @@
 
 [![Advanced Reasoning Project](https://img.shields.io/badge/advanced%20reasoning-in%20progress-blue)]()
 
+---
+
+## 📚 Table of Contents
+- [Why Lucid Memory](#-why-lucid-memory)
+- [Concept Overview](#-concept-overview)
+- [Core Reasoning Flow](#-core-reasoning-flow)
+- [Quick Start](#-quick-start)
+- [Example Usage](#-example-usage)
+- [What's Coming Next](#-whats-coming-next)
+- [Advanced Research Directions](#-advanced-research-directions)
+- [License](#-license)
+- [Vision](#-vision)
+- [How to Use with Local LLMs](#-how-to-use-with-local-llms-ollama-lmstudio-etc)
+- [Current Status and Next Steps](#-current-status-and-next-steps)
+- [Project Structure](#-project-structure)
+
+---
+
 # 🧠 llm-lucid-memory
 
 **Lucid Memory** is an open-source project aiming to enable small and medium LLMs to **reason beyond their context windows** — through modular memory digestion, structured storage, reflective retrieval, and chain-of-draft reasoning.
@@ -104,15 +122,19 @@ Drafted Answer:
 
 ## 🧠 Advanced Research Directions
 
-### Monte Carlo Chain Voting for Reliable Reasoning
+### 🧠 Future Optimization: Monte Carlo Chain Voting for Memory Refinement
 
-Inspired by the research ["More Reliable Code Generation via Monte Carlo Tree Search"](https://openreview.net/pdf?id=xoXn62FzD0) from MIT (summarized [here](https://news.mit.edu/2025/making-ai-generated-code-more-accurate-0418)), we plan to extend Lucid Memory with a **Monte Carlo Chain Voting** mechanism.
+Inspired by research like ["More Reliable Code Generation via Monte Carlo Tree Search"](https://openreview.net/pdf?id=xoXn62FzD0) from MIT (summarized [here](https://news.mit.edu/2025/making-ai-generated-code-more-accurate-0418)), we plan to extend Lucid Memory with a **Monte Carlo Chain Voting** mechanism.
 
-Instead of taking the first drafted reasoning chain, multiple parallel drafts will be generated using the memory graph.  
-Chains will be scored for consistency, logical flow, and alignment with memories.  
-The strongest chain will be selected or composed as the final answer.
+In the future, Lucid Memory will leverage Monte Carlo Chain Voting (MCCV) not just for reasoning — but also for optimizing the memory graph itself.
 
-This approach will drastically reduce hallucination, improve reasoning reliability, and enhance long-term memory growth.
+Instead of trusting the first generated reasoning path, the system will:
+- Generate multiple reasoning chains using the memory graph.
+- Score chains based on logical consistency and alignment with known memories.
+- Identify and refine weak, redundant, or inconsistent memory nodes.
+- Strengthen useful and frequently used paths over time.
+
+This approach allows the memory system to grow smarter naturally, even without direct weight tuning, by continuously improving its structure through reflective evaluation.
 
 Stay tuned as we integrate these innovations into future versions! 🚀
 
