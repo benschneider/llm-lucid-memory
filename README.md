@@ -110,65 +110,70 @@ This chunk-based, multi-faceted digestion creates rich, structured nodes ready f
 ```mermaid
 flowchart TD
 
-  %% Ingestion Phase
-  subgraph Ingestion Phase - Done
+  %% Ingestion Phase (✅ Done)
+  subgraph Ingestion Phase
     A[Raw Knowledge - File or Text] --> B{Structure-Aware Chunker}
     B --> C(Semantic Chunk)
+    style A fill:#d4fcd4,stroke:#333,stroke-width:2px
+    style B fill:#d4fcd4,stroke:#333,stroke-width:2px
+    style C fill:#d4fcd4,stroke:#333,stroke-width:2px
   end
 
-  %% Digestion Phase
-  subgraph Digestion Phase - Done
+  %% Digestion Phase (✅ Done)
+  subgraph Digestion Phase
     C --> D{Multi-Call LLM Digestor}
-    style D fill:#fff4cc,stroke:#333,stroke-width:2px
+    style D fill:#d4fcd4,stroke:#333,stroke-width:2px
   end
 
-  %% Memory Node Phase
-  subgraph Memory Node -  Done
+  %% Memory Node Phase (✅ Done)
+  subgraph Memory Node
     D --> M1[Summary]
     D --> M2[Logic Paths]
     D --> M3[Variables Extracted]
     D --> M4[Tags / Topics]
+    style M1 fill:#d4fcd4,stroke:#333,stroke-width:2px
+    style M2 fill:#d4fcd4,stroke:#333,stroke-width:2px
+    style M3 fill:#d4fcd4,stroke:#333,stroke-width:2px
+    style M4 fill:#d4fcd4,stroke:#333,stroke-width:2px
   end
 
-  %% Memory Storage
-  subgraph Memory Storage - In Progress
+  %% Memory Storage (🚧 In Progress)
+  subgraph Memory Storage
     M1 --> G((Memory + Relationships))
     M2 --> G
     M3 --> G
     M4 --> G
-    style G2 fill:#ffe0f0,stroke:#333,stroke-width:2px
-    
+    style G fill:#fff4cc,stroke:#333,stroke-width:2px
   end
 
-  %% Convert into and add to Graph storage
-  subgraph Graph conversion
-    G --> G2{Todo:
-    Graph Storage }
+  %% Convert into Graph storage (📝 Todo)
+  subgraph Graph Conversion
+    G --> G2{Graph Storage}
+    style G2 fill:#eeeeee,stroke:#333,stroke-width:2px
   end
 
+  %% User Node
   subgraph User
     H(User Question)
   end
 
-
-  %% Query Phase
-  subgraph Todo: Query Phase
-    I{Graph Retriever 
+  %% Query Phase (📝 Todo)
+  subgraph Query Phase
+    H --> I{Graph Retriever 
     Search + Traversal}
-    H --> I
     G2 --> I
-    I --> J[Collect Relevant 
-    Context Nodes]
-    style I fill:#d6eaff,stroke:#333,stroke-width:2px
+    I --> J[Collect Relevant Context Nodes]
+    style I fill:#eeeeee,stroke:#333,stroke-width:2px
+    style J fill:#eeeeee,stroke:#333,stroke-width:2px
   end
 
-  %% Reasoning Phase
-  subgraph Todo: Reasoning Phase
-    J --> K{Chain Of Draft Engine 
-    Planned}
+  %% Reasoning Phase (📝 Todo)
+  subgraph Reasoning Phase
+    J --> K{Chain Of Draft Engine}
     H --> K
     K --> L[Logical Answer]
-    style K fill:#e4d1ff,stroke:#333,stroke-width:2px
+    style K fill:#eeeeee,stroke:#333,stroke-width:2px
+    style L fill:#eeeeee,stroke:#333,stroke-width:2px
   end
 ```
 
