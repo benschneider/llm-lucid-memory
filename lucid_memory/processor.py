@@ -1,5 +1,3 @@
-# lucid_memory/processor.py
-
 import os
 import re
 import concurrent.futures
@@ -14,12 +12,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 MEMORY_GRAPH_PATH = "memory_graph.json"
 
 class ChunkProcessor:
-    def __init__(self,
-                 digestor: Digestor,
-                 memory_graph: MemoryGraph,
-                 status_callback: Callable[[str], None],
-                 completion_callback: Callable[[bool], None]):
-        # (Init remains the same)
+    def __init__(self, digestor: Digestor, memory_graph: MemoryGraph, status_callback: Callable[[str], None], completion_callback: Callable[[bool], None]):
         if not digestor: raise ValueError("Digestor instance required.")
         if not memory_graph: raise ValueError("MemoryGraph instance required.")
         self.digestor = digestor
@@ -39,8 +32,13 @@ class ChunkProcessor:
             base_filename_noext, _ = os.path.splitext(original_filename)
             node_id = f"file_{base_filename_noext}_{chunk_metadata.get('type','unknown')}_{sanitized_chunk_id}_{index+1}"
 
-            logging.info(f"Attempting digestion node ID: {node_id} (Thread: {threading.current_thread().name})")
-            node = self.digestor.digest(chunk_content, node_id=node_id, generate_questions=False)
+            logging.info(f"Attempting digest node ID: {node_id} (Thread: {threading.current_thread().name})")
+            node = self.digestor.digest(
+                chunk_content,
+                node_id=node_id,
+                chunk_metadata=chunk_metadata, # Pass metadata obj
+                generate_questions=False
+             )
 
             if node:
                 node.sequence_index = chunk_metadata.get("sequence_index")
@@ -58,46 +56,44 @@ class ChunkProcessor:
 
 
     def process_chunks(self, chunks: List[Dict[str, Any]], original_filename: str):
-        # ... (submit tasks, wait for completion) ...
-        total_chunks = len(chunks)
-        nodes_to_add: List[MemoryNode] = []
-        max_workers = min(8, os.cpu_count() + 4) if os.cpu_count() else 8
-        if total_chunks == 0: 
+         total_chunks = len(chunks)
+         nodes_to_add: List[MemoryNode] = []
+         max_workers = min(8, os.cpu_count() + 4) if os.cpu_count() else 8
+         if total_chunks == 0: 
             logging.info("No chunks.")
             self.status_callback("Status: No chunks.")
             self.completion_callback(False)
             return
 
-        logging.info(f"Processor start parallel digest ({total_chunks} chunks, max {max_workers} workers).")
-        self.status_callback(f"Status: Starting digestion ({total_chunks} chunks)...")
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix='DigestWorker') as executor:
-            future_to_chunk_index = { executor.submit(self._digest_single_chunk_task, chunk, original_filename, i): i for i, chunk in enumerate(chunks) }
-            processed_chunks = 0
-            for future in concurrent.futures.as_completed(future_to_chunk_index):
-                chunk_index = future_to_chunk_index[future]
-                try:
+         logging.info(f"Processor start parallel digest ({total_chunks} chunks, max {max_workers} workers).")
+         self.status_callback(f"Status: Starting digestion ({total_chunks} chunks)...")
+         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix='DigestWorker') as executor:
+             future_to_chunk_index = { executor.submit(self._digest_single_chunk_task, chunk, original_filename, i): i for i, chunk in enumerate(chunks) }
+             processed_chunks = 0
+             for future in concurrent.futures.as_completed(future_to_chunk_index):
+                 chunk_index = future_to_chunk_index[future]
+                 try:
                     node = future.result()
-                    if node: nodes_to_add.append(node)
-                except Exception as exc: logging.error(f'Chunk task {chunk_index + 1} generated exception: {exc}', exc_info=True)
-                processed_chunks += 1
-                if processed_chunks % 5 == 0 or processed_chunks == total_chunks: self.status_callback(f"Status: Digested {processed_chunks}/{total_chunks} chunks...")
+                    (nodes_to_add.append(node) if node else None)
+                 except Exception as exc: logging.error(f'Chunk task {chunk_index + 1} generated exception: {exc}', exc_info=True)
+                 processed_chunks += 1
+                 if processed_chunks % 5 == 0 or processed_chunks == total_chunks: self.status_callback(f"Status: Digested {processed_chunks}/{total_chunks} chunks...")
 
-        logging.info(f"Processor finished. {len(nodes_to_add)}/{total_chunks} chunks yielded nodes.")
-        graph_changed = False
-        if nodes_to_add:
-            logging.info(f"Adding {len(nodes_to_add)} nodes to MemoryGraph.")
-            for node in nodes_to_add: self.memory_graph.add_node(node)
-            graph_changed = True
-            self._save_graph()
-        final_status = f"Status: Finished {original_filename}. Added {len(nodes_to_add)}/{total_chunks} nodes."
-        final_status += " (Check logs)" if len(nodes_to_add) < total_chunks else ""
-        self.status_callback(final_status)
-        self.completion_callback(graph_changed)
+         logging.info(f"Processor finished. {len(nodes_to_add)}/{total_chunks} chunks yielded nodes.")
+         graph_changed = False
+         if nodes_to_add:
+             logging.info(f"Adding {len(nodes_to_add)} nodes to MemoryGraph.")
+             graph_changed = True
+             for node in nodes_to_add: self.memory_graph.add_node(node)
+             self._save_graph()
+         final_status = f"Status: Finished {original_filename}. Added {len(nodes_to_add)}/{total_chunks} nodes."
+         final_status += " (Check logs)" if len(nodes_to_add) < total_chunks else ""
+         self.status_callback(final_status); self.completion_callback(graph_changed)
 
     def _save_graph(self):
-        try:
+         try:
             self.memory_graph.save_to_json(MEMORY_GRAPH_PATH)
-            logging.info(f"Saved {len(self.memory_graph.nodes)} nodes to {MEMORY_GRAPH_PATH}")
-        except Exception as e:
-            logging.error(f"Memory Save Error: {e}", exc_info=True)
-            self.status_callback(f"Status: Error saving memory file")
+         except Exception as e:
+            logging.error(f"Save graph error: {e}", exc_info=True)
+            self.status_callback(f"Status: Error saving memory")
+

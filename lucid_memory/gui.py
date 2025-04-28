@@ -265,7 +265,8 @@ class LucidMemoryApp:
             self.root.update_idletasks()
             chunks = chunk_file(filename, raw_text) # External call, might fail
             if not chunks:
-                 messagebox.showwarning("Chunking", "File yielded no chunks."); self._update_status_label("Status: File not chunked."); return
+                 messagebox.showwarning("Chunking", "File yielded no chunks."); self._update_status_label("Status: File not chunked.")
+                 return
 
             logging.info(f"Chunking complete ({len(chunks)} chunks). Initializing processor...")
             self._update_status_label(f"Status: Chunked ({len(chunks)}). Starting digestion...")
@@ -273,10 +274,14 @@ class LucidMemoryApp:
 
             # Keep try-except for critical Digestor init
             try: current_digestor = Digestor()
-            except Exception as e: logging.error(f"Failed Digestor init: {e}", exc_info=True); messagebox.showerror("Error", f"Digestor init failed: {e}"); self._update_status_label("Status: Error - Failed Digestor init."); return
+            except Exception as e: 
+                logging.error(f"Failed Digestor init: {e}", exc_info=True)
+                messagebox.showerror("Error", f"Digestor init failed: {e}")
+                self._update_status_label("Status: Error - Failed Digestor init.")
+                return
 
             processor = ChunkProcessor( digestor=current_digestor, memory_graph=self.memory_graph, status_callback=self._update_status_label, completion_callback=self._handle_processing_completion )
-            self.processor_thread = threading.Thread( target=processor.process_chunks, args=(chunks, os.path.basename(filename)), daemon=True )
+            self.processor_thread = threading.Thread( target=processor.process_chunks, args=(chunks, os.path.basename(filename)), daemon=True)
             self.processor_thread.start()
 
         except Exception as e: # Catch file read or chunk_file errors
@@ -287,46 +292,44 @@ class LucidMemoryApp:
     # --- Display Refresh ---
     # Corrected Indentation
     def refresh_memory_display(self):
-        """Clears and re-populates the memory list, now showing linking info."""
+        """Clears and re-populates the memory list, showing linking and potentially code I/O."""
         try:
-            self.memory_list.config(state=tk.NORMAL)
-            self.memory_list.delete(1.0, tk.END)
+            self.memory_list.config(state=tk.NORMAL); self.memory_list.delete(1.0, tk.END)
             if not self.memory_graph.nodes:
-                self.memory_list.insert(tk.END, "(Memory graph is empty)")
+                self.memory_list.insert(tk.END,"(Memory graph is empty)")
             else:
-                # Sort nodes perhaps by sequence index if available, then ID
-                sorted_nodes = sorted(self.memory_graph.nodes.items(), key=lambda item: (getattr(item[1], 'sequence_index', float('inf')), item[0]))
-
+                sorted_nodes = sorted(self.memory_graph.nodes.items(), key=lambda item: (getattr(item, 'sequence_index', float('inf')), item))
                 for node_id, node in sorted_nodes:
-                    # --- Build display text ---
                     display_text = f"ID: {node.id}\n"
-                    # Add sequence and parent if available
                     seq_idx = getattr(node, 'sequence_index', None)
                     parent_id = getattr(node, 'parent_identifier', None)
                     if seq_idx is not None: display_text += f"Seq: {seq_idx}\n"
                     if parent_id: display_text += f"Parent: {parent_id}\n"
-
-                    # Add metadata identifier if available (redundant if parent_id is clear)
-                    # metadata = getattr(node, 'source_chunk_metadata', None)
+                    # metadata = getattr(node, 'source_chunk_metadata', None) # Maybe less needed now
                     # if metadata and metadata.get('identifier'): display_text += f"Source ID: {metadata['identifier']}\n"
-
                     display_text += f"Summary: {node.summary}\n"
                     display_text += f"Tags: {', '.join(node.tags) if node.tags else '(None)'}\n"
-                    # Determine field name dynamically (key_concepts or logical_steps)
-                    concepts_or_steps = getattr(node, 'key_concepts', getattr(node, 'logical_steps', []))
-                    concepts_label = "Concepts" if hasattr(node, 'key_concepts') else "Logical Steps"
-                    display_text += f"{concepts_label} ({len(concepts_or_steps)}):\n"
+                    concepts_or_steps = getattr(node, 'key_concepts', []) # Prefer key_concepts
+                    concepts_label = "Key Concepts"
+                    display_text += f"{concepts_label} ({len(concepts_or_steps)}):\n" ## Adjust terminology
                     display_text += "".join([f"  - {item}\n" for item in concepts_or_steps]) if concepts_or_steps else "  (None extracted)\n"
-                    display_text += f"Follow-up ({len(node.follow_up_questions)}):\n"
-                    display_text += "".join([f"  ? {q}\n" for q in node.follow_up_questions]) if node.follow_up_questions else "  (None)\n"
-                    display_text += "-" * 20 + "\n\n"
+                    dependencies = getattr(node, 'dependencies', [])
+                    outputs = getattr(node, 'produced_outputs', [])
+                    if dependencies or outputs: # Only show if code analysis might have run
+                         display_text += f"Dependencies ({len(dependencies)}):\n"
+                         display_text += "".join([f"  -> {d}\n" for d in dependencies]) if dependencies else "  (None detected)\n"
+                         display_text += f"Produced Outputs ({len(outputs)}):\n"
+                         display_text += "".join([f"  <- {o}\n" for o in outputs]) if outputs else "  (None detected)\n"
+
+                    display_text += "-"*20 + "\n\n"
                     self.memory_list.insert(tk.END, display_text)
             self.memory_list.see(tk.END)
-        except Exception as e:
+        except Exception as e: 
             logging.error(f"Refresh display error: {e}", exc_info=True)
-            try:
-                self.memory_list.insert(tk.END, f"\n--- ERROR REFRESHING DISPLAY ---\n{e}\n")
-            except Exception: pass
+        try:
+            self.memory_list.insert(tk.END, f"\n--- ERROR ---\n{e}\n") 
+        except Exception: 
+                pass
         finally:
             self.memory_list.config(state=tk.DISABLED)
 
