@@ -14,14 +14,17 @@ PROMPTS_FILE_PATH = os.path.join(os.path.dirname(__file__), "prompts.yaml")
 
 
 class Digestor:
-    def __init__(self):
-        # (Init remains the same - loads config and self.prompts)
-        # ... Loads LLM URL/Model and self.prompts from YAML ...
-        # ... Error handling for loading ...
-        if not os.path.exists(CONFIG_PATH): raise FileNotFoundError(f"LLM config missing: {CONFIG_PATH}")
-        with open(CONFIG_PATH, "r", encoding="utf-8") as f: config = json.load(f)
-        self.llm_url = config.get("backend_url"); self.model_name = config.get("model_name")
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        # Load config if not provided
+        if config is None:
+             if not os.path.exists(CONFIG_PATH): raise FileNotFoundError(f"LLM config missing: {CONFIG_PATH}")
+             with open(CONFIG_PATH, "r", encoding="utf-8") as f: config = json.load(f)
+             logging.info(f"Digestor loaded its own config from {CONFIG_PATH}") 
+        
+        self.llm_url = config.get("backend_url")
+        self.model_name = config.get("model_name")
         if not self.llm_url or not self.model_name: raise ValueError("LLM config needs URL/Model.")
+        
         self.prompts: Dict[str, str] = {}
         try: # Load Prompts
             with open(PROMPTS_FILE_PATH, "r", encoding="utf-8") as f: loaded_prompts = yaml.safe_load(f)
