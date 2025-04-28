@@ -1,6 +1,7 @@
 [![License](https://img.shields.io/github/license/benschneider/llm-lucid-memory)](LICENSE)
 [![PyPI version](https://badge.fury.io/py/llm-lucid-memory.svg)](https://badge.fury.io/py/llm-lucid-memory)
 [![Project Status](https://img.shields.io/badge/status-v0.2.1-green)](https://github.com/benschneider/llm-lucid-memory/releases/tag/v0.2.1)
+[![Advanced Reasoning Project](https://img.shields.io/badge/advanced%20reasoning-in%20progress-blue)]()
 
 ---
 
@@ -108,16 +109,16 @@ This chunk-based, multi-faceted digestion creates rich, structured nodes ready f
 
 ```mermaid
 graph LR
-    A[Raw Knowledge\n(File/Text)] --> B{Structure-Aware\nChunker};
+    A[Raw Knowledge - File or Text] --> B{Structure-Aware Chunker};
     B --> C(Chunk);
-    C --> D{Multi-Call LLM\nDigestor};
-    D --> E[Memory Node\n(Summary, Logic,\nVars, Tags)];
-    E --> F((Memory Graph\n+ Relationships));
+    C --> D{Multi-Call LLM Digestor};
+    D --> E[Memory Node - Summary, Logic, Vars, Tags];
+    E --> F((Memory Graph + Relationships));
 
-    G[User Question] --> H{Graph Retriever\n(Search + Traversal)};
+    G[User Question] --> H{Graph Retriever - Search and Traversal};
     F --> H;
     H --> I[Relevant Context Nodes];
-    I --> J{ChainOfDraftEngine\n(Planned)};
+    I --> J{ChainOfDraftEngine - Planned};
     G --> J;
     J --> K[Logical Answer];
 
