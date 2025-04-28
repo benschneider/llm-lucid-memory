@@ -1,6 +1,7 @@
 [![License](https://img.shields.io/github/license/benschneider/llm-lucid-memory)](LICENSE)
 [![PyPI version](https://badge.fury.io/py/llm-lucid-memory.svg)](https://badge.fury.io/py/llm-lucid-memory)
 [![Project Status](https://img.shields.io/badge/status-v0.2.1-green)](https://github.com/benschneider/llm-lucid-memory/releases/tag/v0.2.1)
+[![Advanced Reasoning Project](https://img.shields.io/badge/advanced%20reasoning-in%20progress-blue)]()
 
 ---
 
