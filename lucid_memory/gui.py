@@ -287,22 +287,32 @@ class LucidMemoryApp:
     # --- Display Refresh ---
     # Corrected Indentation
     def refresh_memory_display(self):
-        """Clears and re-populates the memory list. MUST be called from main thread."""
-        # Keep broad try-except as UI updates can fail unexpectedly
+        """Clears and re-populates the memory list, now showing linking info."""
         try:
             self.memory_list.config(state=tk.NORMAL)
             self.memory_list.delete(1.0, tk.END)
             if not self.memory_graph.nodes:
                 self.memory_list.insert(tk.END, "(Memory graph is empty)")
             else:
-                sorted_nodes = sorted(self.memory_graph.nodes.items())
+                # Sort nodes perhaps by sequence index if available, then ID
+                sorted_nodes = sorted(self.memory_graph.nodes.items(), key=lambda item: (getattr(item[1], 'sequence_index', float('inf')), item[0]))
+
                 for node_id, node in sorted_nodes:
+                    # --- Build display text ---
                     display_text = f"ID: {node.id}\n"
-                    metadata = getattr(node, 'source_chunk_metadata', None)
-                    if metadata and metadata.get('identifier'):
-                        display_text += f"Source ID: {metadata['identifier']}\n"
+                    # Add sequence and parent if available
+                    seq_idx = getattr(node, 'sequence_index', None)
+                    parent_id = getattr(node, 'parent_identifier', None)
+                    if seq_idx is not None: display_text += f"Seq: {seq_idx}\n"
+                    if parent_id: display_text += f"Parent: {parent_id}\n"
+
+                    # Add metadata identifier if available (redundant if parent_id is clear)
+                    # metadata = getattr(node, 'source_chunk_metadata', None)
+                    # if metadata and metadata.get('identifier'): display_text += f"Source ID: {metadata['identifier']}\n"
+
                     display_text += f"Summary: {node.summary}\n"
                     display_text += f"Tags: {', '.join(node.tags) if node.tags else '(None)'}\n"
+                    # Determine field name dynamically (key_concepts or logical_steps)
                     concepts_or_steps = getattr(node, 'key_concepts', getattr(node, 'logical_steps', []))
                     concepts_label = "Concepts" if hasattr(node, 'key_concepts') else "Logical Steps"
                     display_text += f"{concepts_label} ({len(concepts_or_steps)}):\n"
@@ -314,12 +324,11 @@ class LucidMemoryApp:
             self.memory_list.see(tk.END)
         except Exception as e:
             logging.error(f"Refresh display error: {e}", exc_info=True)
-            try: # Nested try to insert error message is acceptable here
+            try:
                 self.memory_list.insert(tk.END, f"\n--- ERROR REFRESHING DISPLAY ---\n{e}\n")
-            except Exception: pass # Ignore if error display fails
+            except Exception: pass
         finally:
             self.memory_list.config(state=tk.DISABLED)
-
 
     # --- Server Control ---
     def start_server(self):
