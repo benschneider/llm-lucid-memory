@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="llm-lucid-memory",
-    version="0.2.1",
+    version="0.2.2",
     description="Lucid Memory - Modular reasoning brain for small LLMs",
     long_description=long_description,
     long_description_content_type="text/markdown",
