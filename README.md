@@ -114,15 +114,15 @@ flowchart TD
   subgraph Ingestion Phase
     A[Raw Knowledge - File or Text] --> B{Structure-Aware Chunker}
     B --> C(Semantic Chunk)
-    style A fill:#d4fcd4,stroke:#333,stroke-width:2px
-    style B fill:#d4fcd4,stroke:#333,stroke-width:2px
-    style C fill:#d4fcd4,stroke:#333,stroke-width:2px
+    style A fill:#d4fcd4,stroke:#333,stroke-width:2px,color:#222222
+    style B fill:#d4fcd4,stroke:#333,stroke-width:2px,color:#222222
+    style C fill:#d4fcd4,stroke:#333,stroke-width:2px,color:#222222
   end
 
   %% Digestion Phase (✅ Done)
   subgraph Digestion Phase
     C --> D{Multi-Call LLM Digestor}
-    style D fill:#d4fcd4,stroke:#333,stroke-width:2px
+    style D fill:#d4fcd4,stroke:#333,stroke-width:2px,color:#222222
   end
 
   %% Memory Node Phase (✅ Done)
@@ -131,10 +131,10 @@ flowchart TD
     D --> M2[Logic Paths]
     D --> M3[Variables Extracted]
     D --> M4[Tags / Topics]
-    style M1 fill:#d4fcd4,stroke:#333,stroke-width:2px
-    style M2 fill:#d4fcd4,stroke:#333,stroke-width:2px
-    style M3 fill:#d4fcd4,stroke:#333,stroke-width:2px
-    style M4 fill:#d4fcd4,stroke:#333,stroke-width:2px
+    style M1 fill:#d4fcd4,stroke:#333,stroke-width:2px,color:#222222
+    style M2 fill:#d4fcd4,stroke:#333,stroke-width:2px,color:#222222
+    style M3 fill:#d4fcd4,stroke:#333,stroke-width:2px,color:#222222
+    style M4 fill:#d4fcd4,stroke:#333,stroke-width:2px,color:#222222
   end
 
   %% Memory Storage (🚧 In Progress)
@@ -143,13 +143,13 @@ flowchart TD
     M2 --> G
     M3 --> G
     M4 --> G
-    style G fill:#fff4cc,stroke:#333,stroke-width:2px
+    style G fill:#fff4cc,stroke:#333,stroke-width:2px,color:#222222
   end
 
   %% Convert into Graph storage (📝 Todo)
   subgraph Graph Conversion
     G --> G2{Graph Storage}
-    style G2 fill:#eeeeee,stroke:#333,stroke-width:2px
+    style G2 fill:#eeeeee,stroke:#333,stroke-width:2px,color:#222222
   end
 
   %% User Node
@@ -163,8 +163,8 @@ flowchart TD
     Search + Traversal}
     G2 --> I
     I --> J[Collect Relevant Context Nodes]
-    style I fill:#eeeeee,stroke:#333,stroke-width:2px
-    style J fill:#eeeeee,stroke:#333,stroke-width:2px
+    style I fill:#eeeeee,stroke:#333,stroke-width:2px,color:#222222
+    style J fill:#eeeeee,stroke:#333,stroke-width:2px,color:#222222
   end
 
   %% Reasoning Phase (📝 Todo)
