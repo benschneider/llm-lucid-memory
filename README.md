@@ -175,6 +175,16 @@ flowchart TD
     style K fill:#eeeeee,stroke:#333,stroke-width:2px
     style L fill:#eeeeee,stroke:#333,stroke-width:2px
   end
+
+%% Legend
+  subgraph Legend
+    Legend1(Done ✅):::done
+    Legend2(In Progress 🚧):::inprogress
+    Legend3(Todo 📝):::todo
+    classDef done fill:#d4fcd4,stroke:#333,stroke-width:2px,color:#222;
+    classDef inprogress fill:#fff4cc,stroke:#333,stroke-width:2px,color:#222;
+    classDef todo fill:#eeeeee,stroke:#333,stroke-width:2px,color:#222;
+  end
 ```
 
 ## 🧪 Quick Start
