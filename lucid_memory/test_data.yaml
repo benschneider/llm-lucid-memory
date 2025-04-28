@@ -1,0 +1,60 @@
+# Test data for chunker.py examples
+
+python_code: |
+  import os
+
+  class MyClass:
+      '''Docstring for MyClass.'''
+      def __init__(self, name):
+          self.name = name
+
+      @decorator
+      def greet(self):
+          '''Greets the user.'''
+          print(f"Hello, {self.name}!")
+
+  def standalone_function(x, y):
+      # Does something
+      # On multiple lines
+      result = x + y
+      return result
+
+  async def async_func():
+      pass
+
+markdown_text: |
+  # Main Title
+
+  Some intro text before the first proper section.
+
+  ## Section One Header
+
+  Content for section one.
+  It has multiple lines.
+
+  ```python
+  print("code block in section one")
+  ```
+
+  Another paragraph in section one.
+  
+  ## Section Two Header
+
+  Content for section two.
+  
+  ### Subsection (ignored by ## chunker)
+  More content here.
+
+  ## Section Three (Empty)
+
+  ## Section Four
+  Final bit of text.
+
+
+plain_text: |
+  This is the first paragraph. It's reasonably short.
+  This is the second paragraph. It is much longer just to test the splitting logic that needs to be implemented if a paragraph exceeds the maximum character count set for plain text chunking. We will keep adding words until we are quite sure that it is long enough to trigger the splitting based on the default max_chars value, which might be around 1500 characters or so depending on the implementation details. This ensures robustness for large text blocks. This needs even more words to ensure it definitely gets split. Repeat repeat repeat. La la la. Testing one two three.
+  
+  This is the third paragraph, short again.
+
+  This is the fourth.

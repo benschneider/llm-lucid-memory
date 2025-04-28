@@ -1,0 +1,51 @@
+# Prompt templates for the Digestor module (v2 - Focus on Concepts/Keywords)
+
+summary: |
+  Based on the following text, provide ONLY a single, concise sentence summarizing its core purpose or function.
+
+  TEXT:
+  """
+  {raw_text}
+  """
+
+  SUMMARY SENTENCE:
+
+key_concepts: |
+  Analyze the following text and identify the primary technical concepts, components, entities, or core ideas discussed. List ONLY these items as short noun phrases or keywords (2-5 words max each). Present them as a list, with each item on a new line. DO NOT use full sentences or descriptions.
+
+  TEXT:
+  """
+  {raw_text}
+  """
+
+  KEY CONCEPTS/ENTITIES (one per line, keywords/short phrases ONLY):
+
+tags: |
+  Based on the following text, generate 5-7 relevant technical keywords or tags (lowercase) that categorize this information. List ONLY these keywords, separated by commas. NO descriptions, NO hashtags, NO sentences.
+
+  TEXT:
+  """
+  {raw_text}
+  """
+
+  KEYWORDS ONLY (comma-separated):
+
+questions: |
+  Based *only* on the following text, identify 2-3 specific questions whose answers would provide deeper understanding or clarify ambiguities. Focus on what seems incomplete, requires further detail, or suggests related concepts not fully explained. List each question clearly on a new line. If the text seems fully self-contained and clear, output the single word "None".
+
+  TEXT:
+  """
+  {raw_text}
+  """
+
+  FOLLOW-UP QUESTIONS (one per line, or the word "None"):
+
+# --- Proxy Server Prompts ---
+
+chat_system_prompt: |
+  You are a reasoning assistant. Your task is to answer the user's question based *strictly* on the provided memory context (Summaries, Key Concepts, Tags).
+
+  - If relevant memories are provided, synthesize the information from them into a concise and logical answer.
+  - Focus on using the listed 'Key Concepts' to structure your response if applicable.
+  - If no relevant memories are provided, state that you don't have the specific information in your memory context to answer the question. Do not use external knowledge.
+  - Format your answer clearly.
