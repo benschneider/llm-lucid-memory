@@ -108,22 +108,68 @@ This chunk-based, multi-faceted digestion creates rich, structured nodes ready f
 ## 🔄 Core Reasoning Flow (Conceptual v0.3+)
 
 ```mermaid
-graph LR
-    A[Raw Knowledge - File or Text] --> B{Structure-Aware Chunker};
-    B --> C(Chunk);
-    C --> D{Multi-Call LLM Digestor};
-    D --> E[Memory Node - Summary, Logic, Vars, Tags];
-    E --> F((Memory Graph + Relationships));
+flowchart TD
 
-    G[User Question] --> H{Graph Retriever - Search and Traversal};
-    F --> H;
-    H --> I[Relevant Context Nodes];
-    I --> J{ChainOfDraftEngine - Planned};
-    G --> J;
-    J --> K[Logical Answer];
+  %% Ingestion Phase
+  subgraph Ingestion Phase - Done
+    A[Raw Knowledge - File or Text] --> B{Structure-Aware Chunker}
+    B --> C(Semantic Chunk)
+  end
 
-    style F fill:#f9f,stroke:#333,stroke-width:2px
-    style H fill:#ccf,stroke:#333,stroke-width:2px
+  %% Digestion Phase
+  subgraph Digestion Phase - Done
+    C --> D{Multi-Call LLM Digestor}
+    style D fill:#fff4cc,stroke:#333,stroke-width:2px
+  end
+
+  %% Memory Node Phase
+  subgraph Memory Node -  Done
+    D --> M1[Summary]
+    D --> M2[Logic Paths]
+    D --> M3[Variables Extracted]
+    D --> M4[Tags / Topics]
+  end
+
+  %% Memory Storage
+  subgraph Memory Storage - In Progress
+    M1 --> G((Memory + Relationships))
+    M2 --> G
+    M3 --> G
+    M4 --> G
+    style G2 fill:#ffe0f0,stroke:#333,stroke-width:2px
+    
+  end
+
+  %% Convert into and add to Graph storage
+  subgraph Graph conversion
+    G --> G2{Todo:
+    Graph Storage }
+  end
+
+  subgraph User
+    H(User Question)
+  end
+
+
+  %% Query Phase
+  subgraph Todo: Query Phase
+    I{Graph Retriever 
+    Search + Traversal}
+    H --> I
+    G2 --> I
+    I --> J[Collect Relevant 
+    Context Nodes]
+    style I fill:#d6eaff,stroke:#333,stroke-width:2px
+  end
+
+  %% Reasoning Phase
+  subgraph Todo: Reasoning Phase
+    J --> K{Chain Of Draft Engine 
+    Planned}
+    H --> K
+    K --> L[Logical Answer]
+    style K fill:#e4d1ff,stroke:#333,stroke-width:2px
+  end
 ```
 
 ## 🧪 Quick Start
