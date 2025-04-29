@@ -1,0 +1,72 @@
+# Universal / Text Prompts
+summary: |
+  Based on the following text, provide ONLY a single, concise sentence summarizing its core purpose or function.
+
+  TEXT:
+  {raw_text}
+
+  SUMMARY SENTENCE:
+
+key_concepts: |
+  # Generic prompt usable for text or simple code overview
+  Analyze the following text/code snippet. List the main topics, key arguments/claims, important steps, or core terminology discussed/used. Use short phrases or keywords, one item per line. NO full sentences.
+
+  TEXT/CODE SNIPPET:
+  {raw_text}
+
+  KEY CONCEPTS/STEPS (one item per line, keywords/short phrases ONLY):
+
+tags: |                       # <-- Updated Tags Prompt
+  Based on the following text/code snippet, generate 5-7 relevant
+  technical keywords or tags (lowercase) that categorize this information.
+  OUTPUT FORMAT: A single line containing ONLY lowercase keywords separated by commas.
+  EXAMPLE OUTPUT: database, query, python, error handling, performance
+  NO descriptions, NO hashtags, NO numbered lists, NO bullet points, NO sentences.
+
+  TEXT/CODE SNIPPET:
+  {raw_text}
+
+  KEYWORDS ONLY (single line, comma-separated):
+
+questions: |
+  # Optional follow-up question generation
+  Based *only* on the following text/code snippet, identify 2-3 specific questions whose answers would provide deeper understanding or clarify ambiguities. Focus on what seems incomplete, requires further detail, or suggests related concepts not fully explained. List each question clearly on a new line. If the text seems fully self-contained and clear, output the single word "None".
+
+  TEXT/CODE SNIPPET:
+  {raw_text}
+
+  FOLLOW-UP QUESTIONS (one per line, or the word "None"):
+
+
+# --- Code-Specific Prompts ---
+
+code_dependencies: |               # <-- Updated Dependencies Prompt
+  Analyze the code snippet below. List ONLY the **names** of parameters, external variables (e.g., `self.xyz`, imports, globals), or external functions/methods that this specific snippet REQUIRES to run.
+  Focus on dependencies defined *outside* this exact snippet.
+  List each required name on a NEW line. NO descriptions, NO types, NO explanations. If none required, write the single word "None".
+
+  CODE SNIPPET:
+  {code_chunk}
+
+  REQUIRED EXTERNAL NAMES (one per line, or "None"):
+
+code_outputs: |                 # <-- Updated Outputs Prompt
+  Analyze the code snippet below. List ONLY the **names** of explicit return values OR variables/attributes (e.g., `self.xyz`) whose values are significantly *changed* or *created* by this snippet and seem intended for use *outside* this snippet.
+  Focus on what this snippet PRODUCES or fundamentally ALTERS.
+  List each produced/altered item name on a NEW line. NO descriptions, NO types, NO explanations. If none produced/altered, write the single word "None".
+
+  CODE SNIPPET:
+  {code_chunk}
+
+  PRODUCED/ALTERED NAMES (one per line, or "None"):
+
+
+# --- Proxy Server Prompts ---
+
+chat_system_prompt: |
+  You are a reasoning assistant. Your task is to answer the user's question based *strictly* on the provided memory context (Summaries, Key Concepts/Logical Steps [if available], Tags, Dependencies/Outputs [if available]).
+
+  - If relevant memories are provided, synthesize the information from them into a concise and logical answer.
+  - Prioritize using the listed 'Key Concepts' or 'Logical Steps' if they help structure the response.
+  - If no relevant memories are provided, state that you don't have the specific information in your memory context to answer the question. Do not use external knowledge.
+  - Format your answer clearly.

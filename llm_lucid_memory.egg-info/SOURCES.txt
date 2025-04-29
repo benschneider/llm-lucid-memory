@@ -9,10 +9,14 @@ llm_lucid_memory.egg-info/requires.txt
 llm_lucid_memory.egg-info/top_level.txt
 lucid_memory/__init__.py
 lucid_memory/chain_engine.py
+lucid_memory/chunker.py
+lucid_memory/cli.py
+lucid_memory/controller.py
 lucid_memory/digestor.py
-lucid_memory/gui.py
 lucid_memory/memory_graph.py
 lucid_memory/memory_node.py
+lucid_memory/processor.py
+lucid_memory/prompts.yaml
 lucid_memory/proxy_server.py
 lucid_memory/retriever.py
 tests/test_digestor.py

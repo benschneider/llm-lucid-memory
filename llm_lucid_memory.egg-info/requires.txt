@@ -1,3 +1,5 @@
-fastapi
+fastapi>=0.90.0
 uvicorn
-requests
+requests>=2.25.0
+PyYAML>=5.0
+streamlit>=1.20.0

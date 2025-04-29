@@ -1,1099 +1,216 @@
 {
-  "file_gui_python_function_LucidMemoryApp__build_ui_5": {
-    "id": "file_gui_python_function_LucidMemoryApp__build_ui_5",
-    "raw": "    def _build_ui(self):\n        \"\"\"Builds the main UI elements.\"\"\"\n        self._build_config_frame()\n        self._build_main_frames()\n        self._build_control_frame()\n        self.refresh_memory_display()\n",
-    "summary": "The method constructs and refreshes a user interface.",
+  "file_chunker_python_function_PythonCodeChunker_visit_AsyncFunctionDef_5": {
+    "id": "file_chunker_python_function_PythonCodeChunker_visit_AsyncFunctionDef_5",
+    "raw": "    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):\n        \"\"\"Handles async function definitions.\"\"\"\n        identifier = f\"{self.current_class_name}.{node.name}\" if self.current_class_name else node.name\n        chunk_content = self._get_node_content(node)\n        parent = self.current_class_name or self.file_identifier\n        self._add_chunk(chunk_content, \"python_function_async\", identifier, node, parent)\n",
+    "summary": "The function processes and records information about asynchronous functions defined in Python code.",
     "key_concepts": [
-      "Build UI",
-      "Config frame",
-      "Main frames",
-      "Control frame",
-      "Refresh memory display"
+      "Async function definition handling",
+      "Identifier generation for async functions",
+      "Chunk content extraction from AST nodes",
+      "Parent class or file identification",
+      "Adding chunk to storage with metadata"
     ],
     "tags": [
-      "ui construction",
-      "python function",
-      "memory display",
-      "frame building",
-      "refresh method",
-      "control panel",
-      "configuration settings"
+      "ast",
+      "async function definition",
+      "python code",
+      "ast.NodeVisitor",
+      "_visit_AsyncFunctionDef",
+      "__main__",
+      "class name",
+      "file identifier",
+      "chunk content",
+      "add chunk",
+      "current_class_name",
+      "self.file_identifier",
+      "self.current_class_name",
+      "NodeVisitor subclass",
+      "node attribute",
+      "parent variable",
+      "get_node_content method",
+      "Python AST manipulation"
     ],
     "sequence_index": 4,
-    "parent_identifier": "LucidMemoryApp",
+    "parent_identifier": "PythonCodeChunker",
     "dependencies": [
-      "imports",
-      "globals",
-      "external functions/methods: None",
-      "parameters/external variables:",
+      "current_class_name",
+      "file_identifier",
+      "_current_class_name",
+      "_file_identifier",
       "self.xyz",
-      "self._build_config_frame",
-      "self._build_main_frames",
-      "self._build_control_frame",
-      "refresh_memory_display"
+      "import ast",
+      "import _get_node_content from somewhere",
+      "import add_chunk from somewhere"
     ],
     "produced_outputs": [
-      "self.xyz"
+      "identifier",
+      "parent"
     ],
     "follow_up_questions": [],
     "source": null
   },
-  "file_gui_python_function_LucidMemoryApp__check_digestor_readiness_4": {
-    "id": "file_gui_python_function_LucidMemoryApp__check_digestor_readiness_4",
-    "raw": "    def _check_digestor_readiness(self) -> bool:\n        \"\"\"Checks if Digestor can be initialized based on config.\"\"\"\n        if not self.config.get('backend_url') or not self.config.get('model_name'):\n            logging.error(\"Digestor readiness check: Missing backend_url or model_name.\")\n            return False\n        try:\n            Digestor() # This might raise errors if prompts.yaml is missing/invalid\n            logging.info(\"Digestor readiness check passed.\")\n            return True\n        except Exception as e: # Catch init errors (e.g., file not found)\n            logging.error(f\"Digestor readiness check failed: {e}\", exc_info=True)\n            return False\n",
-    "summary": "The function checks if the Digestor service can be initialized by verifying necessary configuration parameters.",
+  "file_chunker_python_function_chunk_markdown_8": {
+    "id": "file_chunker_python_function_chunk_markdown_8",
+    "raw": "def chunk_markdown(text: str, file_identifier: str = \"unknown_markdown\") -> List[Dict[str, Any]]:\n    \"\"\"Chunks Markdown text by level 2 headers (##).\"\"\"\n    chunks = []\n    parts = re.split(r'(\\n##\\s+.*)', text) # Split before headers\n    current_content = \"\"\n    current_header = \"Introduction\" # Default header\n    sequence_counter = 0 # Sequence index for markdown sections\n\n    if parts and parts[0].strip():\n        current_content = parts[0].strip()\n\n    for i in range(1, len(parts), 2):\n        header_line = parts[i].strip()\n        content_after_header = parts[i+1] if (i + 1) < len(parts) else \"\"\n        header_identifier = re.sub(r'^##\\s*', '', header_line)\n\n        if current_content: # Save previous section\n            chunks.append({\n                \"content\": current_content,\n                \"metadata\": {\n                    \"type\": \"markdown_section\",\n                    \"identifier\": current_header,\n                    \"parent_identifier\": file_identifier, # File is parent of sections\n                    \"sequence_index\": sequence_counter\n                }\n            })\n            sequence_counter += 1\n\n        current_header = header_identifier\n        current_content = content_after_header.strip() # Content for *this* header\n\n    if current_content: # Add the last section\n        chunks.append({\n            \"content\": current_content,\n            \"metadata\": {\n                \"type\": \"markdown_section\",\n                \"identifier\": current_header,\n                \"parent_identifier\": file_identifier,\n                \"sequence_index\": sequence_counter\n            }\n        })\n        sequence_counter += 1\n\n    # Handle case where there are no '##' headers\n    if not chunks and text.strip():\n         chunks.append({\n             \"content\": text.strip(),\n             \"metadata\": {\"type\": \"markdown_file\", \"identifier\": file_identifier, \"parent_identifier\": None, \"sequence_index\": 0}\n         })\n\n    logging.info(f\"Chunked Markdown '{file_identifier}' into {len(chunks)} sections.\")\n    return chunks\n",
+    "summary": "The function `chunk_markdown` divides a given markdown text by level 2 headers (##) and organizes the content under each header.",
     "key_concepts": [
-      "Digestor initialization",
-      "Readiness checking function (_check_digestor_readiness)",
-      "Configuration validation for 'backend_url' and 'model_name",
-      "Logging errors if configuration is missing or invalid",
-      "Attempting to initialize the Digestor object",
-      "Catching exceptions during initialization (e.g., file not found, etc.)",
-      "Returning boolean status based on success/failure of readiness check"
+      "Chunking",
+      "Level 2 headers (`##`)",
+      "Split text by `\\n## ...`",
+      "Default header: \"Introduction",
+      "Sequence index for markdown sections",
+      "Save previous section content before new header starts",
+      "Append metadata with type, identifier, parent_identifier, sequence_index",
+      "Handle case without level 2 headers (whole file as one chunk)",
+      "Logging information about the number of chunks created"
     ],
     "tags": [
-      "digestor initialization",
-      "config validation",
-      "backend_url",
-      "model_name",
-      "error handling",
-      "exception catching",
-      "logging",
-      "Python code",
-      "prompts.yaml",
-      "file not found exceptions"
-    ],
-    "sequence_index": 3,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "self.config",
-      "Digestor"
-    ],
-    "produced_outputs": [
-      "self.config",
-      "_digestor_"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__build_main_frames_7": {
-    "id": "file_gui_python_function_LucidMemoryApp__build_main_frames_7",
-    "raw": "    def _build_main_frames(self):\n        main_frame = tk.Frame(self.root)\n        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)\n        self._build_chat_frame(main_frame)\n        self._build_memory_frame(main_frame)\n",
-    "summary": "The function creates and organizes the primary frames for a chat interface within a Tkinter application.",
-    "key_concepts": [
-      "_build_main_frames",
-      "tk.Frame",
-      "fill=tk.BOTH",
-      "expand=True",
-      "padx=10",
-      "pady=5",
-      "build_chat_frame",
-      "build_memory_frame",
-      "MAIN TOPICS:",
-      "GUI construction with Tkinter",
-      "Frame packing and layout management",
-      "KEY ARGUMENTS/CLAIMS:",
-      "Dynamic frame creation based on user input or context",
-      "CORE TERMINOLOGY:",
-      "Main frames, chat frame, memory frame, tkinter (Tk), pack method"
-    ],
-    "tags": [
-      "tkinter",
-      "tkinter frame",
-      "dynamic packing",
-      "widget creation",
-      "python gui",
-      "custom frames",
-      "application layout",
-      "user interface development"
-    ],
-    "sequence_index": 6,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "root",
-      "self.xyz"
-    ],
-    "produced_outputs": [
-      "main_frame",
-      "self.xyz"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp___init___1": {
-    "id": "file_gui_python_function_LucidMemoryApp___init___1",
-    "raw": "    def __init__(self, root):\n        self.root = root\n        self.root.title(\"Lucid Memory - GUI v0.2.5\")\n        self.config = self._load_config()\n        self.memory_graph = self._load_memory_graph()\n        self.digestor_ready = self._check_digestor_readiness()\n        self.server_process = None\n        self.processor_thread: Optional[threading.Thread] = None\n\n        self._build_ui()\n        self.root.protocol(\"WM_DELETE_WINDOW\", self.on_closing)\n        logging.info(\"GUI Initialized.\")\n        if not self.digestor_ready:\n             self.root.after(100, lambda: self._update_status_label(\"Status: Warning - Digestor config invalid.\"))\n",
-    "summary": "The code initializes a GUI application for managing and visualizing memory graphs with digestor readiness checks.",
-    "key_concepts": [
-      "__init__",
-      "root",
-      "title (\"Lucid Memory - GUI v0.2.5\")",
-      "_load_config()",
-      "memory_graph = self._load_memory_graph()",
-      "digestor_ready = self._check_digestor_readiness()",
-      "server_process: None",
-      "processor_thread: Optional[threading.Thread]",
-      "build_ui()",
-      "protocol(\"WM_DELETE_WINDOW\", on_closing)",
-      "logging.info (\"GUI Initialized.\")",
-      "_update_status_label warning - Digestor config invalid."
-    ],
-    "tags": [
-      "gui initialization",
-      "threading",
-      "protocol",
-      "status label",
-      "digestor readiness",
-      "logging",
-      "tkinter",
-      "window closing",
-      "memory graph loading",
-      "configuration loading",
-      "GUI v0.2.5"
-    ],
-    "sequence_index": 0,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "config",
-      "memory_graph",
-      "digestor_readiness",
-      "server_process_threading",
-      "protocol_WM_DELETE_WINDOW",
-      "status_update_message",
-      "on_closing",
-      "logging_info"
-    ],
-    "produced_outputs": [
-      "root",
-      "config",
-      "memory_graph",
-      "digestor_ready",
-      "processor_thread"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__load_config_2": {
-    "id": "file_gui_python_function_LucidMemoryApp__load_config_2",
-    "raw": "    def _load_config(self):\n        \"\"\"Loads configuration from JSON file or returns default.\"\"\"\n        cfg = DEFAULT_CONFIG.copy() # Start with defaults\n        if os.path.exists(CONFIG_PATH):\n            try:\n                with open(CONFIG_PATH, \"r\", encoding=\"utf-8\") as f:\n                    loaded_cfg = json.load(f)\n                # Update defaults with loaded values, keeping defaults for missing keys\n                cfg.update(loaded_cfg)\n                logging.info(f\"Loaded configuration from {CONFIG_PATH}\")\n            except (json.JSONDecodeError, Exception) as e:\n                 logging.error(f\"Config Error parsing {CONFIG_PATH}: {e}. Using defaults.\", exc_info=False)\n                 # Keep the default cfg\n        else:\n            logging.warning(f\"Config file {CONFIG_PATH} not found. Creating default.\")\n            try:\n                os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)\n                with open(CONFIG_PATH, \"w\", encoding=\"utf-8\") as f:\n                    json.dump(cfg, f, indent=2) # Save the default cfg\n            except Exception as e:\n                logging.error(f\"Config Error creating default file: {e}\", exc_info=False)\n        return cfg\n",
-    "summary": "The function loads configuration from a JSON file or creates and saves it using defaults if not present.",
-    "key_concepts": [
-      "Load configuration from JSON or use defaults",
-      "Check if CONFIG_PATH exists",
-      "Read and parse the config file using json.load()",
-      "Update DEFAULT_CONFIG with loaded values while keeping default for missing keys",
-      "Log loading success/error messages",
-      "Handle exceptions (JSONDecodeError, general Exception)",
-      "Create directory at CONFIG_PATH if it doesn't exist",
-      "Write defaults to JSON file if not found or error occurs"
-    ],
-    "tags": [
-      "json parsing",
-      "configuration loading",
-      "os operations",
-      "exception handling",
-      "json serialization",
-      "config management",
-      "python coding",
-      "utf-8 encoding",
-      "logging messages",
-      "file I/O",
-      "error logging",
-      "directory creation",
-      "default values",
-      "key updates",
-      "environment variables",
-      "software development",
-      "code debugging",
-      "data persistence",
-      "application setup."
-    ],
-    "sequence_index": 1,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "CONFIG_PATH",
-      "DEFAULT_CONFIG",
-      "os.path.exists",
-      "json.load",
-      "logging.info",
-      "logging.warning",
-      "logging.error",
-      "Exception",
-      "os.makedirs",
-      "with open",
-      "json.dump",
-      "exc_info"
-    ],
-    "produced_outputs": [
-      "cfg",
-      "CONFIG_PATH",
-      "DEFAULT_CONFIG"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__build_chat_frame_8": {
-    "id": "file_gui_python_function_LucidMemoryApp__build_chat_frame_8",
-    "raw": "    def _build_chat_frame(self, parent):\n        frame = tk.LabelFrame(parent, text=\"Chat\")\n        frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))\n        self.chat_display = scrolledtext.ScrolledText(frame, wrap=tk.WORD, height=15, state=tk.DISABLED)\n        self.chat_display.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)\n        self.chat_entry = tk.Entry(frame)\n        self.chat_entry.pack(padx=5, pady=(0,5), fill=tk.X)\n        self.chat_entry.bind(\"<Return>\", self.send_message)\n",
-    "summary": "The function creates and configures a chat interface with an entry field for sending messages.",
-    "key_concepts": [
-      "_build_chat_frame",
-      "parent widget",
-      "tk.LabelFrame",
-      "text property: \"Chat",
-      "side option: left",
-      "fill options: both directions",
-      "expand=True",
-      "padx=(0, 5)",
-      "scrolledtext.ScrolledText",
-      "wrap=tk.WORD",
-      "height=15",
-      "state=tk.DISABLED",
-      "chat_display widget",
-      "Entry widget for input (chat_entry)",
-      "pack method with padding and filling properties",
-      "pady options: top-bottom spacing",
-      "fill option: x-direction only",
-      "bind event: \"<Return>\" key press to send_message function"
-    ],
-    "tags": [
-      "tkinter",
-      "scrolledtext",
-      "chat frame",
-      "entry widget",
-      "text wrapping",
-      "event binding",
-      "return key",
-      "disabled state"
+      "text processing",
+      "markdown parsing",
+      "regular expressions",
+      "python function",
+      "data structures",
+      "sequence indexing",
+      "file metadata",
+      "chunking algorithm",
+      "text splitting",
+      "header identification"
     ],
     "sequence_index": 7,
-    "parent_identifier": "LucidMemoryApp",
+    "parent_identifier": "chunker",
     "dependencies": [
-      "tk",
-      "scrolledtext",
-      "self.xyz",
-      "send_message"
+      "`re`",
+      "`logging`"
     ],
     "produced_outputs": [
-      "self.frame",
-      "self.chat_display",
-      "self.chat_entry"
+      "current_content",
+      "chunks",
+      "header_identifier",
+      "sequence_counter"
     ],
     "follow_up_questions": [],
     "source": null
   },
-  "file_gui_python_function_LucidMemoryApp__load_memory_graph_3": {
-    "id": "file_gui_python_function_LucidMemoryApp__load_memory_graph_3",
-    "raw": "    def _load_memory_graph(self):\n        \"\"\"Loads the memory graph from the shared JSON file.\"\"\"\n        graph = MemoryGraph()\n        if os.path.exists(MEMORY_GRAPH_PATH):\n            try:\n                graph.load_from_json(MEMORY_GRAPH_PATH)\n                logging.info(f\"Loaded {len(graph.nodes)} nodes from {MEMORY_GRAPH_PATH}\")\n            except Exception as e: # Keep broad except here for file load robustness\n                logging.warning(f\"Memory Load Warning parsing {MEMORY_GRAPH_PATH}: {e}. Starting empty.\", exc_info=False)\n        else:\n             logging.info(f\"Memory file {MEMORY_GRAPH_PATH} not found. Starting empty.\")\n        return graph\n",
-    "summary": "The function loads a memory graph from a JSON file, handling exceptions and starting with an empty graph if the file is missing or corrupted.",
+  "file_chunker_python_function_PythonCodeChunker__get_node_content_2": {
+    "id": "file_chunker_python_function_PythonCodeChunker__get_node_content_2",
+    "raw": "    def _get_node_content(self, node: ast.AST) -> str:\n        if not hasattr(node,'lineno')or not hasattr(node,'end_lineno'):\n            return\"\"\n\n        start_line=node.lineno-1\n        end_line=node.end_lineno\n\n        if hasattr(node,'decorator_list')and node.decorator_list:\n            try:\n                min_decorator_line=min(d.lineno for d in node.decorator_list if hasattr(d,'lineno'))\n                start_line=min(start_line,min_decorator_line-1)\n            except ValueError:\n                pass\n\n        start_line=max(0,start_line)\n        end_line=min(end_line,len(self.source_lines))\n        return\"\".join(self.source_lines[start_line:end_line])\n",
+    "summary": "The function extracts the source code content of an AST node, adjusting for decorators and line numbers.",
     "key_concepts": [
-      "Load memory graph",
-      "Shared JSON file",
-      "MemoryGraph class instantiation",
-      "Check if path exists: MEMORY_GRAPH_PATH",
-      "Try-catch block for robustness",
-      "Logging info and warning messages",
-      "Count nodes in the loaded graph",
-      "Handle missing files by starting empty",
-      "KEY CONCEPTS/STEPS (one item per line, keywords/short phrases ONLY):",
-      "MemoryGraph class instantiation",
-      "Load from JSON file",
-      "Check path existence: MEMORY_GRAPH_PATH",
-      "Try-catch block for robustness",
-      "Logging info and warning messages",
-      "Count nodes in the loaded graph",
-      "Handle missing files by starting empty"
+      "Main topics: AST manipulation",
+      "Key arguments/claims:",
+      "Handling node attributes in Python's Abstract Syntax Tree (AST)",
+      "Line number adjustments for decorators",
+      "Important steps or core terminology used:",
+      "`ast.AST`",
+      "Node attributes (`lineno`, `end_lineno`)",
+      "Source lines handling",
+      "Decorator line adjustment"
     ],
     "tags": [
-      "memory_graph",
-      "json_file_loading",
-      "os_path_checking",
-      "exception_handling",
-      "logging",
-      "nodes_counting",
-      "shared_resource_access"
+      "ast parsing",
+      "python source code",
+      "ast.AST",
+      "lineno attribute",
+      "decorator_list",
+      "error handling",
+      "string manipulation",
+      "source lines extraction"
+    ],
+    "sequence_index": 1,
+    "parent_identifier": "PythonCodeChunker",
+    "dependencies": [
+      "source_lines",
+      "ast",
+      "hasattr",
+      "min",
+      "max"
+    ],
+    "produced_outputs": [
+      "start_line",
+      "end_line",
+      "source_lines"
+    ],
+    "follow_up_questions": [],
+    "source": null
+  },
+  "file_chunker_python_function_PythonCodeChunker_visit_FunctionDef_4": {
+    "id": "file_chunker_python_function_PythonCodeChunker_visit_FunctionDef_4",
+    "raw": "    def visit_FunctionDef(self, node: ast.FunctionDef):\n        \"\"\"Handles function definitions.\"\"\"\n        identifier = f\"{self.current_class_name}.{node.name}\" if self.current_class_name else node.name\n        chunk_content = self._get_node_content(node)\n        # Parent is class name if inside a class, otherwise the file identifier\n        parent = self.current_class_name or self.file_identifier\n        self._add_chunk(chunk_content, \"python_function\", identifier, node, parent)\n",
+    "summary": "The code defines how to process and record Python function definitions.",
+    "key_concepts": [
+      "Function definition handling",
+      "Identifier generation for functions",
+      "Chunk content extraction from AST nodes",
+      "Parent determination based on context (class or file)",
+      "Adding chunk to a collection with metadata"
+    ],
+    "tags": [
+      "ast.function_def",
+      "python_code",
+      "function_handling",
+      "ast.NodeVisitor",
+      "code_snippet",
+      "class_structure",
+      "file_identification",
+      "chunk_generation",
+      "variable_assignment"
+    ],
+    "sequence_index": 3,
+    "parent_identifier": "PythonCodeChunker",
+    "dependencies": [
+      "current_class_name",
+      "file_identifier",
+      "self.xyz",
+      "import ast",
+      "def _get_node_content(self, node: ast.FunctionDef): ...",
+      "def _add_chunk(self, chunk_content: str, language: str, identifier: str, node: ast.FunctionDef, parent: str) ..."
+    ],
+    "produced_outputs": [
+      "parent",
+      "identifier",
+      "chunk_content",
+      "file_identifier"
+    ],
+    "follow_up_questions": [],
+    "source": null
+  },
+  "file_chunker_python_function_PythonCodeChunker__add_chunk_3": {
+    "id": "file_chunker_python_function_PythonCodeChunker__add_chunk_3",
+    "raw": "    def _add_chunk(self, content: str, node_type: str, identifier: str, node: ast.AST, parent_id: Optional[str]):\n        \"\"\"Helper to create and add a chunk dictionary.\"\"\"\n        if content:\n            self.chunks.append({\n                \"content\": content,\n                \"metadata\": {\n                    \"type\": node_type,\n                    \"identifier\": identifier,\n                    \"parent_identifier\": parent_id, # Added parent\n                    \"sequence_index\": self.sequence_counter, # Added sequence\n                    \"start_line\": getattr(node, 'lineno', None), # Use getattr for safety\n                    \"end_line\": getattr(node, 'end_lineno', None)\n                }\n            })\n            self.sequence_counter += 1 # Increment sequence number\n",
+    "summary": "The function `_add_chunk` appends a new dictionary containing content and metadata to the `chunks` list.",
+    "key_concepts": [
+      "_add_chunk function definition",
+      "content parameter check",
+      "appending to chunks list",
+      "metadata dictionary creation",
+      "node_type inclusion in metadata",
+      "identifier assignment for chunk and parent",
+      "start_line attribute retrieval from AST node",
+      "end_line attribute retrieval using getattr with default None",
+      "sequence_counter increment"
+    ],
+    "tags": [
+      "ast parsing",
+      "python code",
+      "ast.AST",
+      "metadata handling",
+      "sequence counter",
+      "lineno",
+      "end_lineno",
+      "parent identifier",
+      "chunk dictionary",
+      "sequence incrementing"
     ],
     "sequence_index": 2,
-    "parent_identifier": "LucidMemoryApp",
+    "parent_identifier": "PythonCodeChunker",
     "dependencies": [
-      "os",
-      "logging",
-      "MEMORY_GRAPH_PATH",
-      "EXTRA REQUIRED:",
-      "graph = MemoryGraph()",
-      "exc_info = None"
+      "`self.chunks`",
+      "`ast.AST`",
+      "`Optional[str]`"
     ],
     "produced_outputs": [
-      "graph",
-      "self.xyz"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__build_config_frame_6": {
-    "id": "file_gui_python_function_LucidMemoryApp__build_config_frame_6",
-    "raw": "    def _build_config_frame(self):\n        frame = tk.LabelFrame(self.root, text=\"Configuration\")\n        frame.pack(pady=5, padx=10, fill=\"x\")\n\n        tk.Label(frame, text=\"Backend URL:\").grid(row=0, column=0, sticky=\"w\", padx=5)\n        self.backend_entry = tk.Entry(frame, width=60)\n        self.backend_entry.grid(row=0, column=1, padx=5, pady=2, sticky=\"ew\")\n        self.backend_entry.insert(0, self.config.get('backend_url', ''))\n\n        tk.Label(frame, text=\"Model Name:\").grid(row=1, column=0, sticky=\"w\", padx=5)\n        self.model_entry = tk.Entry(frame, width=60)\n        self.model_entry.grid(row=1, column=1, padx=5, pady=2, sticky=\"ew\")\n        self.model_entry.insert(0, self.config.get('model_name', ''))\n\n        tk.Label(frame, text=\"Local Port:\").grid(row=2, column=0, sticky=\"w\", padx=5)\n        self.port_entry = tk.Entry(frame, width=10)\n        self.port_entry.grid(row=2, column=1, padx=(5,0), pady=2, sticky=\"w\")\n        self.port_entry.insert(0, str(self.config.get('local_proxy_port', 8000)))\n\n        tk.Button(frame, text=\"Save Config\", command=self.save_config).grid(row=3, column=1, sticky=\"e\", pady=5, padx=5)\n        frame.columnconfigure(1, weight=1)\n",
-    "summary": "The function creates a configuration interface with fields for backend URL, model name, and local port within a Tkinter LabelFrame.",
-    "key_concepts": [
-      "_build_config_frame method",
-      "tk.LabelFrame creation and packing with padding/padding_x/fill parameter set to \"x",
-      "Grid layout for labels and entries in the frame using row/index/sticky parameters",
-      "Entry widgets populated from configuration dictionary (config.get)",
-      "Button widget created, linked to save_config command",
-      "KEY CONCEPTS/STEPS:",
-      "_build_config_frame method creation",
-      "tk.LabelFrame with text parameter set as \"Configuration",
-      "Packing LabelFrame into root window with padding/padding_x/fill parameters: pady=5, padx=10, fill=\"x",
-      "Grid layout for labels and entries in the frame using row/index/sticky parameters:",
-      "Backend URL label/grid(row=0,column=0)",
-      "backend_entry widget populated from config.get('backend_url', '')/grid(row=0,column=1,padx=5,pady=2,sticky=\"ew\")",
-      "Model Name label/grid(row=1,column=0)",
-      "model_entry widget populated from config.get('model_name', '')/grid(row=1,column=1,padx=5,pady=2,sticky=\"ew\")",
-      "Local Port label/grid(row=2,column=0)",
-      "port_entry widget populated with str(config.get('local_proxy_port', 8000))/grid(row=2,column=1,padx=(5,0),pady=2, sticky=\"w\")",
-      "Button creation linked to save_config command",
-      "Grid layout for button in the frame using row/index/sticky parameters: grid(row=3,column=1,sticky=\"e\", pady=5,padx=5)",
-      "Column weight configuration for column 1 of Frame"
-    ],
-    "tags": [
-      "tkinter",
-      "gui",
-      "configuration",
-      "entry widget",
-      "button",
-      "grid layout",
-      "dynamic input fields"
-    ],
-    "sequence_index": 5,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "self.root",
-      "self.config",
-      "save_config"
-    ],
-    "produced_outputs": [
-      "backend_entry",
-      "model_entry",
-      "port_entry"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__update_status_label_11": {
-    "id": "file_gui_python_function_LucidMemoryApp__update_status_label_11",
-    "raw": "    def _update_status_label(self, text):\n        \"\"\"Safely updates status label via root.after().\"\"\"\n        self.root.after(0, lambda: self.status_label.config(text=text))\n",
-    "summary": "Updates the application's status label with new text in a thread-safe manner.",
-    "key_concepts": [
-      "Update status label",
-      "Safe update method",
-      "Root.after()",
-      "Lambda function",
-      "Status label configuration"
-    ],
-    "tags": [
-      "event-driven programming",
-      "tkinter",
-      "callback function",
-      "GUI update",
-      "threading",
-      "widget configuration",
-      "python gui library"
-    ],
-    "sequence_index": 10,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "root",
-      "self",
-      "status_label"
-    ],
-    "produced_outputs": [
-      "text",
-      "self.status_label"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__build_memory_frame_9": {
-    "id": "file_gui_python_function_LucidMemoryApp__build_memory_frame_9",
-    "raw": "    def _build_memory_frame(self, parent):\n        frame = tk.LabelFrame(parent, text=\"Memory Nodes\")\n        frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))\n        self.memory_list = scrolledtext.ScrolledText(frame, width=55, wrap=tk.WORD, state=tk.DISABLED)\n        self.memory_list.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)\n",
-    "summary": "The function creates and configures a disabled ScrolledText widget within a LabelFrame for displaying memory nodes.",
-    "key_concepts": [
-      "Memory Frame Creation",
-      "tk.LabelFrame",
-      "parent widget",
-      "pack side: RIGHT",
-      "fill mode: BOTH",
-      "expand option: True",
-      "padx parameter for packing",
-      "ScrolledText integration",
-      "width setting of ScrolledText",
-      "wrap style set to WORD",
-      "state disabled",
-      "pady and padx parameters for padding in pack method"
-    ],
-    "tags": [
-      "tkinter",
-      "labelframe",
-      "scrolledtext",
-      "tkinter.widgets",
-      "memory visualization",
-      "python gui",
-      "dynamic layout",
-      "widget packing"
-    ],
-    "sequence_index": 8,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "tk",
-      "scrolledtext"
-    ],
-    "produced_outputs": [
-      "memory_frame",
-      "self.memory_list"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__build_control_frame_10": {
-    "id": "file_gui_python_function_LucidMemoryApp__build_control_frame_10",
-    "raw": "    def _build_control_frame(self):\n        frame = tk.Frame(self.root)\n        frame.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=5)\n        tk.Button(frame, text=\"Load Context File\", command=self.load_context_file).pack(side=tk.LEFT, padx=5)\n        tk.Button(frame, text=\"Start Proxy Server\", command=self.start_server).pack(side=tk.LEFT, padx=5)\n        tk.Button(frame, text=\"Stop Proxy Server\", command=self.stop_server).pack(side=tk.LEFT, padx=5)\n        self.status_label = tk.Label(frame, text=\"Status: Initialized\", relief=tk.SUNKEN, anchor=\"w\")\n        self.status_label.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)\n",
-    "summary": "The function creates a bottom toolbar with buttons to load context files and control proxy server operations in a Tkinter GUI.",
-    "key_concepts": [
-      "Defining function",
-      "tk.Frame creation and packing",
-      "Adding buttons for actions: Load Context File, Start Proxy Server, Stop Proxy Server",
-      "Creating status label with initial text \"Status: Initialized",
-      "Setting relief to sunken and anchor to west on the label"
-    ],
-    "tags": [
-      "tkinter",
-      "tkinter frame",
-      "button command",
-      "status label",
-      "proxy server",
-      "load context file",
-      "start stop server",
-      "widget packing",
-      "relief sunked",
-      "anchor west"
-    ],
-    "sequence_index": 9,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "self.root",
-      "tk.Frame",
-      "side",
-      "fill",
-      "padx",
-      "pady",
-      "text",
-      "command",
-      "Label",
-      "SUNKEN"
-    ],
-    "produced_outputs": [
-      "frame",
-      "self.root",
-      "tk.Button",
-      "load_context_file",
-      "start_server",
-      "stop_server",
-      "status_label"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__handle_processing_completion_12": {
-    "id": "file_gui_python_function_LucidMemoryApp__handle_processing_completion_12",
-    "raw": "    def _handle_processing_completion(self, graph_changed: bool):\n        \"\"\"Callback when chunk processing finishes.\"\"\"\n        logging.info(f\"Processing completion callback. Graph changed: {graph_changed}\")\n        if graph_changed:\n            self.root.after(0, self.refresh_memory_display)\n        self.processor_thread = None # Clear thread tracker\n",
-    "summary": "The method serves as a callback to refresh the memory display and clear processing threads upon completing chunk processing in an application that uses graphs.",
-    "key_concepts": [
-      "_handle_processing_completion",
-      "Callback function",
-      "Logging information",
-      "Graph changed flag",
-      "Refresh memory display",
-      "Processor thread tracking"
-    ],
-    "tags": [
-      "thread management",
-      "callback function",
-      "threading",
-      "python",
-      "logging",
-      "GUI update",
-      "memory refresh",
-      "event handling",
-      "graphical interface",
-      "concurrent processing"
-    ],
-    "sequence_index": 11,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "logging",
-      "self.root",
-      "refresh_memory_display",
-      "processor_thread"
-    ],
-    "produced_outputs": [
-      "self.root",
-      "self.refresh_memory_display",
-      "processor_thread"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__append_chat_message_13": {
-    "id": "file_gui_python_function_LucidMemoryApp__append_chat_message_13",
-    "raw": "    def _append_chat_message(self, text):\n         \"\"\"Safely appends text to chat display via root.after().\"\"\"\n         def append():\n             self.chat_display.config(state=tk.NORMAL)\n             self.chat_display.insert(tk.END, text)\n             self.chat_display.config(state=tk.DISABLED)\n             self.chat_display.see(tk.END)\n         self.root.after(0, append)\n",
-    "summary": "The function appends new chat messages to a display in a GUI application.",
-    "key_concepts": [
-      "_append_chat_message",
-      "Safely appends text to chat display",
-      "root.after()",
-      "tk.NORMAL state",
-      "insert(tk.END) method",
-      "config(state=tk.DISABLED)",
-      "see() function",
-      "self.root attribute",
-      "0 delay (ms)"
-    ],
-    "tags": [
-      "tkinter",
-      "threading",
-      "gui",
-      "root.after",
-      "config",
-      "insert",
-      "state management",
-      "dynamic update",
-      "event handling"
-    ],
-    "sequence_index": 12,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "root",
-      "tk",
-      "self.chat_display",
-      "tklib"
-    ],
-    "produced_outputs": [
-      "self.chat_display",
-      "append"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp_send_message_15": {
-    "id": "file_gui_python_function_LucidMemoryApp_send_message_15",
-    "raw": "    def send_message(self, event=None):\n        \"\"\"Handles sending a message from the chat entry.\"\"\"\n        user_message = self.chat_entry.get().strip()\n        if not user_message: return\n        self.chat_entry.delete(0, tk.END)\n        self._append_chat_message(f\"User: {user_message}\\n\")\n\n        if not self.server_process or self.server_process.poll() is not None:\n             self._append_chat_message(\"Error: Proxy server not running.\\n\\n\")\n             return\n\n        proxy_url = f\"http://localhost:{self.config.get('local_proxy_port', 8000)}/chat\"\n        payload = { \"messages\": [{\"role\": \"user\", \"content\": user_message}], \"temperature\": 0.2 }\n        # Keep thread for network request to avoid blocking GUI\n        threading.Thread(target=self._send_request_thread, args=(proxy_url, payload), daemon=True).start()\n",
-    "summary": "The function `send_message` sends a user's chat message through an active proxy server and updates the conversation log accordingly.",
-    "key_concepts": [
-      "send_message function definition",
-      "handling user input from chat entry widget",
-      "deleting previous message in the chat entry",
-      "appending new user's messages to the chat log",
-      "checking server process status and proxy availability",
-      "constructing HTTP request payload for sending a message via an API endpoint",
-      "using threading to prevent GUI blocking during network requests"
-    ],
-    "tags": [
-      "threading",
-      "chat message handling",
-      "proxy server error",
-      "http requests",
-      "gui non-blocking",
-      "python tkinter",
-      "user input processing",
-      "network communication",
-      "concurrent programming",
-      "asynchronous tasks",
-      "threading in python",
-      "chatbot interaction",
-      "local proxy configuration",
-      "temperature parameter for messages",
-      "daemon threads",
-      "request payload construction",
-      "event-driven programming",
-      "multi-threaded applications"
-    ],
-    "sequence_index": 14,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "event",
-      "self.chat_entry",
-      "tk.END",
-      "server_process",
-      "config",
-      "local_proxy_port",
-      "messages",
-      "role",
-      "content",
-      "Thread",
-      "daemon"
-    ],
-    "produced_outputs": [
-      "user_message proxy_url payload"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp_save_config_14": {
-    "id": "file_gui_python_function_LucidMemoryApp_save_config_14",
-    "raw": "    def save_config(self):\n        \"\"\"Saves current configuration.\"\"\"\n        try:\n            new_port = int(self.port_entry.get())\n            new_config = {\n                \"backend_url\": self.backend_entry.get().strip(),\n                \"model_name\": self.model_entry.get().strip(),\n                \"local_proxy_port\": new_port\n            }\n            if not new_config['backend_url'] or not new_config['model_name']:\n                 raise ValueError(\"Backend URL/Model Name required.\")\n\n            # Keep try-except for file operations\n            os.makedirs(os.path.dirname(CONFIG_PATH), exist_ok=True)\n            with open(CONFIG_PATH, \"w\", encoding=\"utf-8\") as f:\n                json.dump(new_config, f, indent=2)\n\n            messagebox.showinfo(\"Saved\", \"Configuration updated.\")\n            self.config = new_config\n            self.digestor_ready = self._check_digestor_readiness()\n            status = \"Status: Config saved. Digestor \" + (\"ready.\" if self.digestor_ready else \"NOT ready.\")\n            self._update_status_label(status)\n        except ValueError as e:\n             messagebox.showerror(\"Input Error\", f\"{e}\") # More specific error\n        except Exception as e: # Keep broad except for file save\n             messagebox.showerror(\"Save Error\", f\"Failed to save configuration: {e}\")\n             logging.error(\"Save config error\", exc_info=True)\n",
-    "summary": "The function `save_config` saves the current application settings into a JSON-formatted configuration file and updates related status indicators.",
-    "key_concepts": [
-      "Save current configuration",
-      "Get new port value from entry widget",
-      "Create dictionary with backend URL and model name; include local proxy port if valid",
-      "Validate required fields: 'backend_url' & 'model_name",
-      "Make directory for CONFIG_PATH (if not exists)",
-      "Write JSON config to file at CONFIG_PATH",
-      "Show success message box (\"Saved\")",
-      "Update internal configuration object (`self.config`)",
-      "Check digestor readiness status and update `digestor_ready`",
-      "Prepare save status string based on digester readiness",
-      "Display updated status in label via `_update_status_label` method",
-      "Handle ValueError for missing required fields with error dialog",
-      "Catch general exceptions during file operations, log errors"
-    ],
-    "tags": [
-      "config saving",
-      "exception handling",
-      "os.makedirs",
-      "json serialization",
-      "user interface",
-      "status update",
-      "digestor readiness check",
-      "file operations",
-      "messagebox",
-      "input validation",
-      "backend_url",
-      "model_name",
-      "local_proxy_port",
-      "configuration management",
-      "python tkinter",
-      "logging error",
-      "utf-8 encoding"
-    ],
-    "sequence_index": 13,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "CONFIG_PATH",
-      "self.port_entry",
-      "self.backend_entry",
-      "self.model_entry",
-      "os",
-      "json",
-      "messagebox",
-      "logging",
-      "digestor_ready",
-      "_status_label",
-      "_config",
-      "_digestor_readiness_check",
-      "_update_status_label"
-    ],
-    "produced_outputs": [
-      "new_port",
-      "CONFIG_PATH",
-      "self.config",
-      "self.digestor_ready",
-      "status"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp__send_request_thread_16": {
-    "id": "file_gui_python_function_LucidMemoryApp__send_request_thread_16",
-    "raw": "    def _send_request_thread(self, url, payload):\n        \"\"\"Sends HTTP request in background. Updates chat UI.\"\"\"\n        try: # Keep try-except for network/request errors\n            response = requests.post(url, json=payload, timeout=60)\n            response.raise_for_status() # Check for HTTP errors 4xx/5xx\n            data = response.json()\n            reply = \"Error: Could not parse LLM response.\"\n            # Simplify response checking slightly\n            choices = data.get(\"choices\")\n            if isinstance(choices, list) and choices:\n                 msg = choices[0].get(\"message\")\n                 reply = msg.get(\"content\", reply) if isinstance(msg, dict) else reply\n            self._append_chat_message(f\"Assistant: {reply}\\n\\n\")\n        except requests.exceptions.Timeout:\n            self._append_chat_message(\"Error: Chat request timed out.\\n\\n\")\n        except requests.exceptions.RequestException as e: # Catch all request-related errors\n            logging.warning(f\"Proxy comm error: {e}\", exc_info=False)\n            self._append_chat_message(f\"Error communicating with proxy: {e}\\n\\n\")\n        except Exception as e: # Catch potential JSON errors or others\n            logging.error(\"Process chat response error\", exc_info=True)\n            self._append_chat_message(f\"Error processing response: {e}\\n\\n\")\n",
-    "summary": "The function sends an HTTP POST request in the background and updates a user interface with responses.",
-    "key_concepts": [
-      "HTTP request sending in background thread",
-      "Updates UI with responses/messages",
-      "Network/request errors handling using try-except blocks",
-      "Timeout exception for network requests",
-      "Handling 4xx and 5xx status codes via `raise_for_status()`",
-      "Parsing JSON response from server",
-      "Extracting specific data (choices) from the parsed JSON object",
-      "Appending messages to chat UI based on responses/messages received or errors encountered",
-      "Logging exceptions with detailed error information"
-    ],
-    "tags": [
-      "http requests",
-      "background thread",
-      "json parsing",
-      "exception handling",
-      "timeout exceptions",
-      "proxy communication",
-      "http errors",
-      "python coding",
-      "logging",
-      "network issues"
-    ],
-    "sequence_index": 15,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "requests",
-      "self.xyz",
-      "logging"
-    ],
-    "produced_outputs": [
-      "reply",
-      "self._append_chat_message"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp_start_server_19": {
-    "id": "file_gui_python_function_LucidMemoryApp_start_server_19",
-    "raw": "    def start_server(self):\n        \"\"\"Starts the Uvicorn proxy server subprocess.\"\"\"\n        if self.server_process and self.server_process.poll() is None:\n            messagebox.showinfo(\"Server\", \"Already running.\"); return\n        py_exe = os.sys.executable; mod_path = \"lucid_memory.proxy_server:app\"\n        try: # Keep try-except for subprocess/port errors\n            port_str = self.port_entry.get(); int(port_str) # Validate\n            cmd = [py_exe, \"-m\", \"uvicorn\", mod_path, \"--host\", \"0.0.0.0\", \"--port\", port_str, \"--reload\", \"--log-level\", \"warning\"]\n            logging.info(f\"Starting server: {' '.join(cmd)}\"); startupinfo = None\n            if os.name == 'nt': startupinfo = subprocess.STARTUPINFO(); startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW; startupinfo.wShowWindow = subprocess.SW_HIDE\n            # Use text=True for easier stdout/stderr handling\n            self.server_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', startupinfo=startupinfo)\n            self._update_status_label(f\"Status: Proxy server starting on port {port_str}...\")\n            self.root.after(2000, self.check_server_status) # Check later\n        except ValueError: messagebox.showerror(\"Error\", \"Invalid port number.\")\n        except Exception as e: logging.error(f\"Server launch fail: {e}\", exc_info=True); messagebox.showerror(\"Server Error\", f\"Failed: {e}\"); self._update_status_label(\"Status: Failed start\")\n",
-    "summary": "The function `start_server` initiates a Uvicorn proxy server subprocess on the specified port, with error handling and status updates.",
-    "key_concepts": [
-      "Start Uvicorn proxy server",
-      "Check if process running already",
-      "Validate port number input",
-      "Construct command for subprocess",
-      "Handle Windows startup info separately",
-      "Launch the server using Popen with stdout/stderr handling",
-      "Update status label after starting",
-      "Error handling: ValueError, general exceptions"
-    ],
-    "tags": [
-      "subprocess",
-      "uvicorn",
-      "server_process",
-      "port_entry",
-      "exception handling",
-      "logging",
-      "startupinfo",
-      "os.name",
-      "subprocess.Popen",
-      "messagebox",
-      "text=True",
-      "encoding='utf-8",
-      "errors='replace"
-    ],
-    "sequence_index": 18,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "self.server_process",
-      "os.sys.executable",
-      "mod_path",
-      "port_entry",
-      "subprocess.STARTUPINFO",
-      "subprocess.Popen",
-      "logging.info",
-      "messagebox.showinfo",
-      "messagebox.showerror",
-      "root.after",
-      "check_server_status"
-    ],
-    "produced_outputs": [
-      "server_process",
-      "port_str",
-      "status_label"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp_check_server_status_20": {
-    "id": "file_gui_python_function_LucidMemoryApp_check_server_status_20",
-    "raw": "    def check_server_status(self):\n        \"\"\"Checks if the server process is running or terminated.\"\"\"\n        if not self.server_process: return\n        rc = self.server_process.poll()\n        if rc is not None: # Server terminated\n            # Simplified error reading (might miss output if read too late)\n            stderr = self.server_process.stderr.read() if self.server_process.stderr else \"(No stderr)\"\n            stdout = self.server_process.stdout.read() if self.server_process.stdout else \"(No stdout)\"\n            logging.error(f\"Server terminated (code {rc}).\\nStderr: {stderr}\\nStdout: {stdout}\")\n            messagebox.showerror(\"Server Error\", f\"Server terminated (code {rc}). Check logs.\")\n            self._update_status_label(\"Status: Server terminated unexpectedly\")\n            self.server_process = None\n        else: # Server still running\n            self._update_status_label(f\"Status: Proxy server running on port {self.port_entry.get()}\")\n",
-    "summary": "The function checks the status of a proxy server process, indicating whether it is active or has terminated.",
-    "key_concepts": [
-      "Check server status function definition",
-      "Return if no process found",
-      "Polling the server process for its state",
-      "Handling termination of a server process",
-      "Reading stderr and stdout outputs upon failure",
-      "Logging error with code details from polling result",
-      "Displaying an error message box to user about terminal event",
-      "Updating UI label indicating status change",
-      "Setting server_process attribute back to None after handling"
-    ],
-    "tags": [
-      "server process monitoring",
-      "polling",
-      "error handling",
-      "logging",
-      "messagebox",
-      "status label update",
-      "proxy server management",
-      "python tkinter",
-      "subprocess.poll",
-      "stderr/stdout reading"
-    ],
-    "sequence_index": 19,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "server_process stderr stdout logging messagebox_port entry"
-    ],
-    "produced_outputs": [
-      "server_process stderr stdout _update_status_label messagebox showerror status label proxy_server_running_port"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp_load_context_file_17": {
-    "id": "file_gui_python_function_LucidMemoryApp_load_context_file_17",
-    "raw": "    def load_context_file(self):\n        \"\"\"Opens file dialog, chunks file, and starts Processor in background thread.\"\"\"\n        if not self.digestor_ready:\n            messagebox.showerror(\"Error\", \"Digestor not ready. Check config.\"); return\n        if self.processor_thread and self.processor_thread.is_alive():\n             messagebox.showwarning(\"Busy\", \"Already processing file.\"); return\n\n        filename = filedialog.askopenfilename(\n            title=\"Select Context File\",\n            filetypes=((\"Python\",\"*.py\"),(\"Markdown\",\"*.md\"),(\"Text\",\"*.txt\"),(\"All\",\"*.*\"))\n        )\n        if not filename: return\n\n        try: # Keep try-except for file reading/chunking\n            with open(filename, \"r\", encoding=\"utf-8\", errors='ignore') as f:\n                 raw_text = f.read()\n\n            logging.info(f\"Starting chunking for {filename}\")\n            self._update_status_label(f\"Status: Chunking {os.path.basename(filename)}...\")\n            self.root.update_idletasks()\n            chunks = chunk_file(filename, raw_text) # External call, might fail\n            if not chunks:\n                 messagebox.showwarning(\"Chunking\", \"File yielded no chunks.\"); self._update_status_label(\"Status: File not chunked.\")\n                 return\n\n            logging.info(f\"Chunking complete ({len(chunks)} chunks). Initializing processor...\")\n            self._update_status_label(f\"Status: Chunked ({len(chunks)}). Starting digestion...\")\n            self.root.update_idletasks()\n\n            # Keep try-except for critical Digestor init\n            try: current_digestor = Digestor()\n            except Exception as e: \n                logging.error(f\"Failed Digestor init: {e}\", exc_info=True)\n                messagebox.showerror(\"Error\", f\"Digestor init failed: {e}\")\n                self._update_status_label(\"Status: Error - Failed Digestor init.\")\n                return\n\n            processor = ChunkProcessor( digestor=current_digestor, memory_graph=self.memory_graph, status_callback=self._update_status_label, completion_callback=self._handle_processing_completion )\n            self.processor_thread = threading.Thread( target=processor.process_chunks, args=(chunks, os.path.basename(filename)), daemon=True)\n            self.processor_thread.start()\n\n        except Exception as e: # Catch file read or chunk_file errors\n            logging.error(f\"File Read/Chunk Error: {e}\", exc_info=True)\n            messagebox.showerror(\"File Load Error\", f\"Read/chunk failed: {e}\")\n            self._update_status_label(\"Status: Error reading/chunking file\")\n",
-    "summary": "The function `load_context_file` opens a dialog to select and process context files in chunks using an external processor.",
-    "key_concepts": [
-      "File dialog",
-      "Digestor readiness check",
-      "Processor thread status checking",
-      "Select context file with filters",
-      "Read and chunk raw text from a file",
-      "Chunk processing completion logging",
-      "Initialize digesting processor for chunks",
-      "Handle exceptions during initialization or reading/chunking process",
-      "Update UI elements based on progress and errors"
-    ],
-    "tags": [
-      "file handling",
-      "threading",
-      "digestor initialization",
-      "exception logging",
-      "dialog interaction",
-      "status updates",
-      "chunk processing",
-      "python coding",
-      "memory graph management",
-      "encoding issues",
-      "subprocess calling",
-      "error messaging",
-      "background tasks",
-      "unicode support",
-      "file selection",
-      "process monitoring",
-      "graphical user interface",
-      "concurrent programming",
-      "data parsing",
-      "software debugging",
-      "multi-threading",
-      "application lifecycle"
-    ],
-    "sequence_index": 16,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "self.digestor_ready",
-      "filedialog",
-      "messagebox",
-      "os.path.basename",
-      "chunk_file",
-      "Digestor",
-      "ChunkProcessor",
-      "threading.Thread",
-      "current_digestor",
-      "memory_graph",
-      "processor.process_chunks",
-      "_exc_info_",
-      "_root.update_idletasks",
-      "_excepthandler_"
-    ],
-    "produced_outputs": [
-      "filename",
-      "chunks",
-      "current_digestor",
-      "processor_thread",
-      "status_callback",
-      "completion_callback"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp_on_closing_22": {
-    "id": "file_gui_python_function_LucidMemoryApp_on_closing_22",
-    "raw": "    def on_closing(self):\n        \"\"\"Handles window close event.\"\"\"\n        if self.server_process and self.server_process.poll() is None:\n            if messagebox.askokcancel(\"Quit\", \"Server running. Stop and exit?\"):\n                self.stop_server()\n                self.root.destroy()\n        else:\n            self.root.destroy()\n",
-    "summary": "The function manages the closing of a window, prompting for confirmation to stop an active server before exiting.",
-    "key_concepts": [
-      "on_closing method",
-      "window close event handling",
-      "server_process check",
-      "process polling status",
-      "askokcancel dialog box",
-      "Quit confirmation messagebox",
-      "stop_server function call",
-      "root destruction"
-    ],
-    "tags": [
-      "event handling",
-      "tkinter",
-      "server process",
-      "window closing",
-      "user confirmation",
-      "application shutdown"
-    ],
-    "sequence_index": 21,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "server_process",
-      "messagebox",
-      "root"
-    ],
-    "produced_outputs": [
-      "self.server_process",
-      "self.root",
-      "messagebox",
-      "stop_server"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp_refresh_memory_display_18": {
-    "id": "file_gui_python_function_LucidMemoryApp_refresh_memory_display_18",
-    "raw": "    def refresh_memory_display(self):\n        \"\"\"Clears and re-populates the memory list, showing linking and potentially code I/O.\"\"\"\n        try:\n            self.memory_list.config(state=tk.NORMAL); self.memory_list.delete(1.0, tk.END)\n            if not self.memory_graph.nodes:\n                self.memory_list.insert(tk.END,\"(Memory graph is empty)\")\n            else:\n                sorted_nodes = sorted(self.memory_graph.nodes.items(), key=lambda item: (getattr(item, 'sequence_index', float('inf')), item))\n                for node_id, node in sorted_nodes:\n                    display_text = f\"ID: {node.id}\\n\"\n                    seq_idx = getattr(node, 'sequence_index', None)\n                    parent_id = getattr(node, 'parent_identifier', None)\n                    if seq_idx is not None: display_text += f\"Seq: {seq_idx}\\n\"\n                    if parent_id: display_text += f\"Parent: {parent_id}\\n\"\n                    # metadata = getattr(node, 'source_chunk_metadata', None) # Maybe less needed now\n                    # if metadata and metadata.get('identifier'): display_text += f\"Source ID: {metadata['identifier']}\\n\"\n                    display_text += f\"Summary: {node.summary}\\n\"\n                    display_text += f\"Tags: {', '.join(node.tags) if node.tags else '(None)'}\\n\"\n                    concepts_or_steps = getattr(node, 'key_concepts', []) # Prefer key_concepts\n                    concepts_label = \"Key Concepts\"\n                    display_text += f\"{concepts_label} ({len(concepts_or_steps)}):\\n\" ## Adjust terminology\n                    display_text += \"\".join([f\"  - {item}\\n\" for item in concepts_or_steps]) if concepts_or_steps else \"  (None extracted)\\n\"\n                    dependencies = getattr(node, 'dependencies', [])\n                    outputs = getattr(node, 'produced_outputs', [])\n                    if dependencies or outputs: # Only show if code analysis might have run\n                         display_text += f\"Dependencies ({len(dependencies)}):\\n\"\n                         display_text += \"\".join([f\"  -> {d}\\n\" for d in dependencies]) if dependencies else \"  (None detected)\\n\"\n                         display_text += f\"Produced Outputs ({len(outputs)}):\\n\"\n                         display_text += \"\".join([f\"  <- {o}\\n\" for o in outputs]) if outputs else \"  (None detected)\\n\"\n\n                    display_text += \"-\"*20 + \"\\n\\n\"\n                    self.memory_list.insert(tk.END, display_text)\n            self.memory_list.see(tk.END)\n        except Exception as e: \n            logging.error(f\"Refresh display error: {e}\", exc_info=True)\n        try:\n            self.memory_list.insert(tk.END, f\"\\n--- ERROR ---\\n{e}\\n\") \n        except Exception: \n                pass\n        finally:\n            self.memory_list.config(state=tk.DISABLED)\n",
-    "summary": "The function `refresh_memory_display` clears and repopulates a memory list with detailed information about nodes in the graph, including sequence index, parent identifier, summary text, tags, key concepts or steps derived from code analysis.",
-    "key_concepts": [
-      "Memory refresh display function",
-      "Clear memory list",
-      "Re-populate with sorted nodes and details",
-      "Handle empty graph case",
-      "Sort by sequence index or default to infinity for missing attribute",
-      "Display node attributes: ID, Seq Index, Parent Identifier (if any)",
-      "Summary of the node's content",
-      "Tags associated with a node",
-      "Key Concepts extracted from key_concepts property",
-      "Dependencies and produced outputs if available",
-      "Key Terminology:",
-      "tk.NORMAL/tk.DISABLED state for tkinter Listbox widget configuration",
-      "sorted function usage in Python",
-      "getattr method to access attributes dynamically",
-      "Exception handling/logging",
-      "Node properties: id, sequence_index, parent_identifier, summary, tags, key_concepts, dependencies, produced_outputs"
-    ],
-    "tags": [
-      "tkinter",
-      "memory display refresh",
-      "exception handling",
-      "sorting nodes",
-      "node attributes",
-      "dynamic list population",
-      "logging errors",
-      "graphical user interface",
-      "python tkinter code"
-    ],
-    "sequence_index": 17,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "tk",
-      "self",
-      "memory_graph",
-      "node",
-      "getattr",
-      "logging",
-      "exc_info",
-      "state",
-      "NORMAL",
-      "END",
-      "delete",
-      "insert",
-      "see",
-      "DISABLED",
-      "ERROR"
-    ],
-    "produced_outputs": [
-      "memory_graph",
-      "self.memory_list",
-      "display_text"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_LucidMemoryApp_stop_server_21": {
-    "id": "file_gui_python_function_LucidMemoryApp_stop_server_21",
-    "raw": "    def stop_server(self):\n        \"\"\"Stops the running Uvicorn server process.\"\"\"\n        if self.server_process and self.server_process.poll() is None:\n            logging.info(\"Stopping server...\");\n            try: # Keep try-except for process termination\n                self.server_process.terminate()\n                try: self.server_process.wait(timeout=3) # Shorter wait\n                except subprocess.TimeoutExpired: logging.warning(\"Killing server.\"); self.server_process.kill(); self.server_process.wait()\n                logging.info(\"Server stopped.\"); messagebox.showinfo(\"Server\", \"Server stopped.\")\n                self._update_status_label(\"Status: Stopped\")\n            except Exception as e: logging.error(f\"Stop server error: {e}\", exc_info=True); messagebox.showerror(\"Server Error\", f\"Stop error: {e}\"); self._update_status_label(\"Status: Error stopping\")\n            finally: self.server_process = None\n        else:\n            logging.info(\"Stop called, server not running.\")\n            self._update_status_label(\"Status: Idle (Server not running)\") if \"running\" in self.status_label.cget(\"text\") else None\n",
-    "summary": "The function stops a Uvicorn server process and updates the status label accordingly.",
-    "key_concepts": [
-      "Stop Uvicorn server",
-      "Check process status with poll()",
-      "Terminate the server process gracefully using terminate() and wait(timeout=3)",
-      "Handle TimeoutExpired exception by killing the process directly if it doesn't stop in time",
-      "Log actions: info for stopping success; warning/error messages on failure or exceptions",
-      "Update UI elements to reflect new state (status label, messagebox with error/success notification)"
-    ],
-    "tags": [
-      "process termination",
-      "subprocess",
-      "exception handling",
-      "uvicorn",
-      "logging",
-      "messagebox",
-      "status label update",
-      "server management",
-      "timeout handling",
-      "python tkinter",
-      "process monitoring",
-      "error reporting",
-      "application lifecycle",
-      "software development",
-      "code debugging",
-      "system administration."
-    ],
-    "sequence_index": 20,
-    "parent_identifier": "LucidMemoryApp",
-    "dependencies": [
-      "self.server_process",
-      "logging",
-      "messagebox",
-      "status_label",
-      "_messagebox_showinfo",
-      "_messagebox_showerror",
-      "_update_status_label",
-      "subprocess",
-      "TimeoutExpired",
-      "exc_info",
-      "_none_"
-    ],
-    "produced_outputs": [
-      "server_process",
-      "self.server_process",
-      "status_label",
-      "messagebox.showinfo",
-      "_messagebox_showerror",
-      "_status_stopped",
-      "_status_error_stopping",
-      "_Status_Stopped",
-      "_Status_ErrorStopping",
-      "Status: Stopped",
-      "Server Error: Stop error:",
-      "Status: Idle (Server not running)"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_gui_python_function_main_23": {
-    "id": "file_gui_python_function_main_23",
-    "raw": "def main():\n    root = tk.Tk()\n    root.minsize(700, 500)\n    app = LucidMemoryApp(root)\n    root.mainloop()\n",
-    "summary": "The code initializes and runs a Tkinter-based memory aid application.",
-    "key_concepts": [
-      "Tkinter",
-      "Mainloop",
-      "Minimize window size",
-      "Application initialization",
-      "GUI application"
-    ],
-    "tags": [
-      "tkinter",
-      "tkinter",
-      "gui application",
-      "python",
-      "lucidmemoryapp",
-      "event loop",
-      "widget",
-      "mainloop",
-      "tclib"
-    ],
-    "sequence_index": 22,
-    "parent_identifier": "gui",
-    "dependencies": [
-      "tk",
-      "LucidMemoryApp"
-    ],
-    "produced_outputs": [
-      "app_root",
-      "root_minsize_700x500",
-      "lucid_memory_app_instance"
+      "self.chunks",
+      "self.sequence_counter"
     ],
     "follow_up_questions": [],
     "source": null
@@ -1101,23 +218,25 @@
   "file_chunker_python_function_PythonCodeChunker_visit_ClassDef_6": {
     "id": "file_chunker_python_function_PythonCodeChunker_visit_ClassDef_6",
     "raw": "    def visit_ClassDef(self, node: ast.ClassDef):\n        \"\"\"Handles class definitions and visits methods within them.\"\"\"\n        class_identifier = node.name\n        # Decide if we want a node for the class itself (Optional)\n        # If so, its parent would be the file identifier\n        # class_content = self._get_node_content(node) # Get full class content\n        # self._add_chunk(class_content, \"python_class\", class_identifier, node, self.file_identifier)\n\n        # Process methods *within* the class\n        original_class_name = self.current_class_name\n        self.current_class_name = class_identifier # Set parent context for methods\n        # Explicitly visit function defs within the class body\n        for item in node.body:\n            if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):\n                self.visit(item)\n        self.current_class_name = original_class_name # Restore context\n",
-    "summary": "The `visit_ClassDef` method processes and visits methods defined inside a Python class.",
+    "summary": "The `visit_ClassDef` method processes and visits methods defined inside a given Python class definition.",
     "key_concepts": [
       "Class definition handling",
       "Node traversal in AST",
       "Python class identification and processing",
-      "Method visitation within classes",
-      "Context management for nested structures"
+      "Context management for nested structures",
+      "Visiting function definitions within a class body",
+      "Restoring previous state after visiting methods"
     ],
     "tags": [
       "python",
       "classes",
       "methods",
       "function definitions",
-      "async functions",
+      "asynchronous functions",
+      "decorators",
       "abstract syntax tree",
-      "visitor pattern",
-      "code traversal"
+      "code traversal",
+      "class definition handling"
     ],
     "sequence_index": 5,
     "parent_identifier": "PythonCodeChunker",
@@ -1139,125 +258,6 @@
     "follow_up_questions": [],
     "source": null
   },
-  "file_chunker_python_function_PythonCodeChunker__get_node_content_2": {
-    "id": "file_chunker_python_function_PythonCodeChunker__get_node_content_2",
-    "raw": "    def _get_node_content(self, node: ast.AST) -> str:\n        if not hasattr(node,'lineno')or not hasattr(node,'end_lineno'):\n            return\"\"\n\n        start_line=node.lineno-1\n        end_line=node.end_lineno\n\n        if hasattr(node,'decorator_list')and node.decorator_list:\n            try:\n                min_decorator_line=min(d.lineno for d in node.decorator_list if hasattr(d,'lineno'))\n                start_line=min(start_line,min_decorator_line-1)\n            except ValueError:\n                pass\n\n        start_line=max(0,start_line)\n        end_line=min(end_line,len(self.source_lines))\n        return\"\".join(self.source_lines[start_line:end_line])\n",
-    "summary": "The function extracts the source code content of an AST node, adjusting for decorators and line numbers.",
-    "key_concepts": [
-      "Main topics: AST manipulation",
-      "Key arguments/claims:",
-      "Handling node attributes in Python's Abstract Syntax Tree.",
-      "Adjusting start and end lines based on decorators.",
-      "Important steps or core terminology used:",
-      "`ast.AST`",
-      "Node attributes (`lineno`, `end_lineno`)",
-      "Decorator handling with line numbers",
-      "Source code slicing"
-    ],
-    "tags": [
-      "ast parsing",
-      "python source code",
-      "ast.AST",
-      "lineno attribute",
-      "decorator_list",
-      "error handling",
-      "string manipulation",
-      "source lines extraction"
-    ],
-    "sequence_index": 1,
-    "parent_identifier": "PythonCodeChunker",
-    "dependencies": [
-      "source_lines",
-      "ast"
-    ],
-    "produced_outputs": [
-      "start_line",
-      "end_line",
-      "source_lines"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_chunker_python_function_PythonCodeChunker_visit_FunctionDef_4": {
-    "id": "file_chunker_python_function_PythonCodeChunker_visit_FunctionDef_4",
-    "raw": "    def visit_FunctionDef(self, node: ast.FunctionDef):\n        \"\"\"Handles function definitions.\"\"\"\n        identifier = f\"{self.current_class_name}.{node.name}\" if self.current_class_name else node.name\n        chunk_content = self._get_node_content(node)\n        # Parent is class name if inside a class, otherwise the file identifier\n        parent = self.current_class_name or self.file_identifier\n        self._add_chunk(chunk_content, \"python_function\", identifier, node, parent)\n",
-    "summary": "The code defines how to process and record Python function definitions.",
-    "key_concepts": [
-      "Function definition handling",
-      "Identifier generation for functions",
-      "Content extraction from nodes",
-      "Parent determination based on context",
-      "Adding chunk to storage with metadata"
-    ],
-    "tags": [
-      "ast",
-      "function definition",
-      "python code",
-      "ast.NodeVisitor",
-      "_get_node_content",
-      "class name",
-      "file identifier",
-      "chunk content",
-      "current_class_name",
-      "visit_FunctionDef"
-    ],
-    "sequence_index": 3,
-    "parent_identifier": "PythonCodeChunker",
-    "dependencies": [
-      "current_class_name",
-      "file_identifier",
-      "_current_node_content_",
-      "_add_chunk_"
-    ],
-    "produced_outputs": [
-      "parent",
-      "identifier",
-      "chunk_content",
-      "file_identifier"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_chunker_python_function_chunk_markdown_8": {
-    "id": "file_chunker_python_function_chunk_markdown_8",
-    "raw": "def chunk_markdown(text: str, file_identifier: str = \"unknown_markdown\") -> List[Dict[str, Any]]:\n    \"\"\"Chunks Markdown text by level 2 headers (##).\"\"\"\n    chunks = []\n    parts = re.split(r'(\\n##\\s+.*)', text) # Split before headers\n    current_content = \"\"\n    current_header = \"Introduction\" # Default header\n    sequence_counter = 0 # Sequence index for markdown sections\n\n    if parts and parts[0].strip():\n        current_content = parts[0].strip()\n\n    for i in range(1, len(parts), 2):\n        header_line = parts[i].strip()\n        content_after_header = parts[i+1] if (i + 1) < len(parts) else \"\"\n        header_identifier = re.sub(r'^##\\s*', '', header_line)\n\n        if current_content: # Save previous section\n            chunks.append({\n                \"content\": current_content,\n                \"metadata\": {\n                    \"type\": \"markdown_section\",\n                    \"identifier\": current_header,\n                    \"parent_identifier\": file_identifier, # File is parent of sections\n                    \"sequence_index\": sequence_counter\n                }\n            })\n            sequence_counter += 1\n\n        current_header = header_identifier\n        current_content = content_after_header.strip() # Content for *this* header\n\n    if current_content: # Add the last section\n        chunks.append({\n            \"content\": current_content,\n            \"metadata\": {\n                \"type\": \"markdown_section\",\n                \"identifier\": current_header,\n                \"parent_identifier\": file_identifier,\n                \"sequence_index\": sequence_counter\n            }\n        })\n        sequence_counter += 1\n\n    # Handle case where there are no '##' headers\n    if not chunks and text.strip():\n         chunks.append({\n             \"content\": text.strip(),\n             \"metadata\": {\"type\": \"markdown_file\", \"identifier\": file_identifier, \"parent_identifier\": None, \"sequence_index\": 0}\n         })\n\n    logging.info(f\"Chunked Markdown '{file_identifier}' into {len(chunks)} sections.\")\n    return chunks\n",
-    "summary": "The function `chunk_markdown` divides a given markdown text by level 2 headers (##) and organizes the content under these headings.",
-    "key_concepts": [
-      "Chunking",
-      "Level 2 headers (`##`)",
-      "Splitting text by `\\n## ...`",
-      "Default header: \"Introduction",
-      "Sequence index for markdown sections",
-      "Saving previous section content before new one starts",
-      "Appending chunks to list with metadata (type, identifier, parent_identifier)",
-      "Handling no '##' headers case",
-      "Logging chunked Markdown count"
-    ],
-    "tags": [
-      "text processing",
-      "markdown parsing",
-      "regular expressions",
-      "python function",
-      "data structures",
-      "sequence indexing",
-      "text chunking",
-      "metadata extraction"
-    ],
-    "sequence_index": 7,
-    "parent_identifier": "chunker",
-    "dependencies": [
-      "`re`",
-      "`logging`"
-    ],
-    "produced_outputs": [
-      "current_content",
-      "chunks",
-      "header_identifier",
-      "sequence_counter"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
   "file_chunker_python_function_PythonCodeChunker___init___1": {
     "id": "file_chunker_python_function_PythonCodeChunker___init___1",
     "raw": "    def __init__(self, source_code: str, file_identifier: str = \"unknown_file\"):\n        self.source_lines = source_code.splitlines(keepends=True)\n        self.chunks: List[Dict[str, Any]] = []\n        self.current_class_name: Optional[str] = None\n        self.file_identifier = file_identifier # Store filename for top-level parent ID\n        self.sequence_counter = 0 # Counter for chunk order\n",
@@ -1275,25 +275,38 @@
       "class detection",
       "code analysis",
       "string manipulation",
-      "list comprehension",
       "sequence tracking",
-      "data structures",
       "python programming",
+      "data structures",
+      "object-oriented programming",
       "identifier extraction",
-      "variable initialization."
+      "file handling",
+      "text processing",
+      "variable assignment",
+      "function definition",
+      "error checking",
+      "modular design",
+      "coding standards",
+      "software development",
+      "language syntax",
+      "automated testing",
+      "debugging tools",
+      "version control integration"
     ],
     "sequence_index": 0,
     "parent_identifier": "PythonCodeChunker",
     "dependencies": [
       "List",
-      "Optional str",
-      "Unknown_file",
-      "Sequence counter",
-      "Source code",
-      "File identifier",
-      "Current class name",
-      "Chunks list",
-      "Keepends flag"
+      "Optional",
+      "FileIdentifier",
+      "SequenceCounter",
+      "SourceCode",
+      "Keepends",
+      "Lines",
+      "DictStrAny",
+      "ClassName",
+      "TopLevelParentID",
+      "ChunkOrder"
     ],
     "produced_outputs": [
       "source_lines",
@@ -1301,52 +314,6 @@
       "current_class_name",
       "file_identifier",
       "sequence_counter"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
-  "file_chunker_python_function_PythonCodeChunker__add_chunk_3": {
-    "id": "file_chunker_python_function_PythonCodeChunker__add_chunk_3",
-    "raw": "    def _add_chunk(self, content: str, node_type: str, identifier: str, node: ast.AST, parent_id: Optional[str]):\n        \"\"\"Helper to create and add a chunk dictionary.\"\"\"\n        if content:\n            self.chunks.append({\n                \"content\": content,\n                \"metadata\": {\n                    \"type\": node_type,\n                    \"identifier\": identifier,\n                    \"parent_identifier\": parent_id, # Added parent\n                    \"sequence_index\": self.sequence_counter, # Added sequence\n                    \"start_line\": getattr(node, 'lineno', None), # Use getattr for safety\n                    \"end_line\": getattr(node, 'end_lineno', None)\n                }\n            })\n            self.sequence_counter += 1 # Increment sequence number\n",
-    "summary": "The function `_add_chunk` creates and appends a dictionary containing content metadata to an internal list.",
-    "key_concepts": [
-      "_add_chunk function definition",
-      "content parameter check and append to chunks list if not empty",
-      "metadata dictionary creation with node_type, identifier, parent_id, sequence_index, start_line, end_line attributes",
-      "incrementing self.sequence_counter after appending chunk information",
-      "KEY CONCEPTS/STEPS (one item per line):",
-      "_add_chunk function definition",
-      "content parameter check and append to chunks list if not empty",
-      "metadata dictionary creation with node_type attribute",
-      "metadata dictionary inclusion of identifier attribute",
-      "metadata dictionary addition of parent_id attribute # Added parent",
-      "sequence_index assignment using self.sequence_counter variable",
-      "start_line retrieval from ast.AST object attributes (lineno)",
-      "end_line retrieval from ast.AST object attributes (end_lineno) # Use getattr for safety",
-      "incrementing self.sequence_counter after appending chunk information"
-    ],
-    "tags": [
-      "ast parsing",
-      "python code",
-      "ast.AST",
-      "metadata handling",
-      "sequence counter",
-      "lineno attribute",
-      "end_lineno attribute",
-      "parent identifier",
-      "chunk dictionary",
-      "incrementing variable"
-    ],
-    "sequence_index": 2,
-    "parent_identifier": "PythonCodeChunker",
-    "dependencies": [
-      "ast",
-      "self.chunks",
-      "self.sequence_counter"
-    ],
-    "produced_outputs": [
-      "self.chunks",
-      "self.sequence_counter"
     ],
     "follow_up_questions": [],
     "source": null
@@ -1362,10 +329,10 @@
       "logging",
       "fallback mechanism",
       "python file parse error",
-      "top-level functions",
+      "function definition",
       "class definition",
-      "exception handling",
       "source lines",
+      "exception handling",
       "metadata extraction"
     ],
     "sequence_index": 6,
@@ -1373,17 +340,13 @@
     "dependencies": [
       "file_identifier",
       "source_lines",
-      "EXTRA REQUIRED:",
-      "self.visit",
-      "logging",
-      "ast",
+      "EXTRA REQUIRED FUNCTIONS/METHODS:",
+      "visit",
+      "logging.error",
+      "ast.parse",
       "SyntaxError",
-      "exc_info",
-      "List",
-      "Dict",
-      "Any",
-      "TypeCommentsTrue",
-      "python_file_parse_error"
+      "exc_info=True",
+      "List[Dict[str, Any]]"
     ],
     "produced_outputs": [
       "self.chunks",
@@ -1396,34 +359,33 @@
   "file_chunker_python_function_chunk_plain_text_9": {
     "id": "file_chunker_python_function_chunk_plain_text_9",
     "raw": "def chunk_plain_text(text: str, file_identifier: str = \"unknown_text\", max_chars: int = 1500) -> List[Dict[str, Any]]:\n    \"\"\"Chunks plain text by paragraphs, splitting large paragraphs.\"\"\"\n    chunks = []\n    paragraphs = re.split(r'\\n\\s*\\n', text)\n    sequence_counter = 0\n\n    for i, paragraph in enumerate(paragraphs):\n        paragraph = paragraph.strip()\n        if not paragraph: continue\n\n        if len(paragraph) <= max_chars:\n            chunks.append({\n                \"content\": paragraph,\n                \"metadata\": {\"type\": \"text_paragraph\", \"identifier\": f\"Paragraph {i+1}\", \"parent_identifier\": file_identifier, \"sequence_index\": sequence_counter}\n            })\n            sequence_counter += 1\n        else:\n            start, para_chunk_counter = 0, 1\n            while start < len(paragraph):\n                end = start + max_chars \n                split_pos = paragraph.rfind(' ', start, end)\n                if split_pos != -1 and end < len(paragraph): end = split_pos + 1\n                elif end >= len(paragraph): end = len(paragraph)\n                chunk_content = paragraph[start:end].strip()\n                if chunk_content:\n                    chunks.append({\"content\": chunk_content, \"metadata\": {\"type\": \"text_split\", \"identifier\": f\"Paragraph {i+1} Part {para_chunk_counter}\", \"parent_identifier\": file_identifier, \"sequence_index\": sequence_counter}})\n                    sequence_counter += 1\n                    para_chunk_counter += 1\n                start = end\n\n    logging.info(f\"Chunked Text '{file_identifier}' into {len(chunks)} paragraphs/splits.\")\n    return chunks\n",
-    "summary": "The function `chunk_plain_text` divides large plain text documents by paragraph, ensuring each chunk does not exceed a specified character limit.",
+    "summary": "The function `chunk_plain_text` divides large plain text documents by paragraph, ensuring no single chunk exceeds a specified character limit.",
     "key_concepts": [
       "Chunk plain text by paragraphs",
       "Split large paragraphs based on max_chars limit",
-      "Use regular expressions for splitting: re.split(r'\\n\\s*\\n')",
-      "Strip leading/trailing whitespace from each paragraph",
-      "Skip empty or null paragraphs",
-      "Append chunks with metadata (type, identifier, sequence_index)",
-      "Handle both short and long paragraphs differently",
-      "Log the number of created text splits/splits"
+      "Use regular expressions for splitting lines",
+      "Strip whitespace from each paragraph",
+      "Check if a paragraph is empty and skip it",
+      "Append non-empty chunks to the list with metadata",
+      "Handle long paragraphs that exceed max_chars using word boundaries",
+      "Log total number of processed text segments"
     ],
     "tags": [
       "text processing",
-      "text chunking",
-      "regex split",
-      "paragraph segmentation",
-      "metadata tagging",
-      "sequence indexing",
+      "regex",
       "string manipulation",
-      "python code",
-      "logging",
-      "file handling"
+      "chunking",
+      "metadata",
+      "python",
+      "text splitting",
+      "sequence counter",
+      "logging"
     ],
     "sequence_index": 8,
     "parent_identifier": "chunker",
     "dependencies": [
-      "re",
-      "logging"
+      "`re`",
+      "`logging`"
     ],
     "produced_outputs": [
       "chunks",
@@ -1433,173 +395,19 @@
     "follow_up_questions": [],
     "source": null
   },
-  "file_chunker_python_function_PythonCodeChunker_visit_AsyncFunctionDef_5": {
-    "id": "file_chunker_python_function_PythonCodeChunker_visit_AsyncFunctionDef_5",
-    "raw": "    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):\n        \"\"\"Handles async function definitions.\"\"\"\n        identifier = f\"{self.current_class_name}.{node.name}\" if self.current_class_name else node.name\n        chunk_content = self._get_node_content(node)\n        parent = self.current_class_name or self.file_identifier\n        self._add_chunk(chunk_content, \"python_function_async\", identifier, node, parent)\n",
-    "summary": "The function processes and records information about asynchronous functions defined in Python code.",
-    "key_concepts": [
-      "`visit_AsyncFunctionDef`",
-      "async function definitions handling",
-      "Identifier generation for functions",
-      "`_get_node_content` method usage",
-      "Chunk content extraction and addition",
-      "Python asynchronous code identification",
-      "Class-based visitor pattern in AST manipulation"
-    ],
-    "tags": [
-      "ast",
-      "async function",
-      "python",
-      "ast.NodeVisitor",
-      "code generation",
-      "parsing",
-      "syntax analysis",
-      "tokenization",
-      "abstract syntax tree",
-      "dynamic typing",
-      "coroutine",
-      "generator expression",
-      "metaclass",
-      "inheritance",
-      "polymorphism",
-      "encapsulation",
-      "abstraction",
-      "object-oriented programming",
-      "functional programming",
-      "lambda expressions",
-      "decorators",
-      "context managers",
-      "exception handling",
-      "type hinting",
-      "variable scope",
-      "closure",
-      "recursion",
-      "tail call optimization",
-      "first-class functions",
-      "higher-order functions",
-      "callback function",
-      "event-driven programming",
-      "concurrency",
-      "multithreading",
-      "multiprocessing",
-      "asyncio",
-      "threading module",
-      "concurrent.futures",
-      "futures",
-      "coroutines",
-      "async/await syntax",
-      "generator expressions",
-      "yield statement",
-      "itertools library",
-      "functools library",
-      "collections module",
-      "heapq module",
-      "bisect module",
-      "random module",
-      "math module",
-      "statistics module",
-      "os module",
-      "sys module",
-      "time module",
-      "datetime module",
-      "numpy module",
-      "pandas module",
-      "scipy module",
-      "matplotlib module",
-      "seaborn module",
-      "scikit-learn module",
-      "tensorflow module",
-      "pytorch module",
-      "keras module",
-      "fastai library",
-      "torchtext library",
-      "transformers library",
-      "spaCy library",
-      "nltk library",
-      "gensim library",
-      "word2vec model",
-      "docx library",
-      "openpyxl library",
-      "xlrd library",
-      "pandas_datareader library",
-      "requests library",
-      "BeautifulSoup library",
-      "lxml library",
-      "scrapy library",
-      "selenium webdriver",
-      "pyautogui library",
-      "PyQt5 library",
-      "Tkinter GUI toolkit",
-      "wxPython cross-platform GUI toolkit",
-      "Kivy touch-based graphical user interface framework",
-      "Pygame multimedia programming library",
-      "Flask web application framework",
-      "Django high-level Python Web framework",
-      "Pyramid minimalistic Python Web framework",
-      "Bottle micro-framework for Python",
-      "Tornado asynchronous networking library",
-      "Twisted network engine written in Python",
-      "PyMongo MongoDB driver for Python",
-      "SQLAlchemy ORM toolkit for Python",
-      "NumPy array object manipulation and mathematical functions",
-      "Pandas data analysis tools built on top of NumPy arrays",
-      "Matplotlib plotting library based on NumPy arrays",
-      "Seaborn statistical visualization tool building upon matplotlib",
-      "SciKit-Learn machine learning algorithms in the context of Python numerical computing environment",
-      "TensorFlow deep learning framework for scientific computation using Python",
-      "PyTorch dynamic neural network modeling and training system with strong GPU acceleration built to provide maximum flexibility and speed",
-      "Keras high-level neural networks API running on top of TensorFlow or Theano (Python extension)",
-      "Torchtext library providing data processing utilities specifically designed for natural language understanding tasks in machine learning applications."
-    ],
-    "sequence_index": 4,
-    "parent_identifier": "PythonCodeChunker",
-    "dependencies": [
-      "current_class_name",
-      "file_identifier",
-      "_current_class_name",
-      "_file_identifier",
-      "self.xyz",
-      "import ast",
-      "import _get_node_content from somewhere",
-      "import add_chunk from somewhere"
-    ],
-    "produced_outputs": [
-      "identifier",
-      "parent"
-    ],
-    "follow_up_questions": [],
-    "source": null
-  },
   "file_chunker_python_function_chunk_file_10": {
     "id": "file_chunker_python_function_chunk_file_10",
     "raw": "def chunk_file(file_path: str, file_content: str) -> List[Dict[str, Any]]:\n    \"\"\"Detects file type and applies the appropriate chunking strategy.\"\"\"\n    filename = os.path.basename(file_path)\n    base_filename_noext, extension = os.path.splitext(filename)\n    extension = extension.lower()\n\n    logging.info(f\"Chunking file: {filename} (type: {extension})\")\n\n    # Pass filename identifier to chunkers\n    if extension == \".py\":\n        # Use base filename as the top-level parent identifier for functions\n        chunker = PythonCodeChunker(file_content, file_identifier=base_filename_noext)\n        return chunker.chunk()\n    elif extension == \".md\":\n        return chunk_markdown(file_content, file_identifier=base_filename_noext)\n    elif extension in [\".txt\", \".log\"] or not extension:\n         return chunk_plain_text(file_content, file_identifier=base_filename_noext)\n    else:\n        logging.warning(f\"Unknown file type '{extension}'. Using plain text chunking.\")\n        return chunk_plain_text(file_content, file_identifier=base_filename_noext)\n",
-    "summary": "The function `chunk_file` detects a file's extension and applies an appropriate strategy to split its content into chunks based on the identified programming language or format.",
+    "summary": "The function `chunk_file` detects a file's extension and applies an appropriate strategy to split its content into chunks.",
     "key_concepts": [
       "Detects file type",
       "Applies appropriate strategy based on extension",
-      "Uses PythonCodeChunker for .py files with base filename as identifier",
-      "Handles Markdown (.md) and plain text (.txt, .log)",
-      "Logs unknown extensions using plain text chunking",
-      "KEY ARGUMENTS/CLAIMS:",
-      "File identification by name and type",
-      "Extension-based strategy selection",
-      "Handling of known file types (Python code, markdown files, plain texts/logs)",
-      "CORE TERMINOLOGY/DISPLAYED CONCEPTS:",
-      "Chunk_file function definition",
-      "os.path.basename",
-      "os.path.splitext",
-      "logging.info",
-      "PythonCodeChunker class usage",
-      "chunk_markdown and chunk_plain_text functions",
-      "IMPORTANT STEPS/KEYWORDS:",
-      "File path input: file_path, str type",
-      "Extract filename from path using basename()",
-      "Split filename into base name without extension (base_filename_noext) and extension",
-      "Convert to lowercase for consistent comparison",
-      "Log the process with logging.info",
-      "Determine chunking strategy based on .py or .md extensions",
-      "Use PythonCodeChunker class if file is a Python script (.py)",
-      "Call specific function: chunk_markdown() for markdown files, default plain text handling otherwise"
+      "Logging information about the process",
+      "Handles different extensions (.py, .md, .txt/.log)",
+      "Uses specific chunkers for each format:",
+      "PythonCodeChunker for \".py",
+      "Chunk_markdown for \".md",
+      "Plain text handling for others or unknown types"
     ],
     "tags": [
       "file processing",
@@ -1627,6 +435,211 @@
       "chunker",
       "filename",
       "extension"
+    ],
+    "follow_up_questions": [],
+    "source": null
+  },
+  "file_processor_python_function_ChunkProcessor___init___1": {
+    "id": "file_processor_python_function_ChunkProcessor___init___1",
+    "raw": "    def __init__(self, digestor: Digestor, memory_graph: MemoryGraph, status_callback: Callable[[str], None], completion_callback: Callable[[bool], None]):\n        if not digestor: raise ValueError(\"Digestor instance required.\")\n        if not memory_graph: raise ValueError(\"MemoryGraph instance required.\")\n        self.digestor = digestor\n        self.memory_graph = memory_graph\n        self.status_callback = status_callback\n        self.completion_callback = completion_callback\n",
+    "summary": "The code defines a class constructor that initializes an object with mandatory instances of Digestor and MemoryGraph, along with optional callbacks for status updates and task completion.",
+    "key_concepts": [
+      "Digestor initialization",
+      "MemoryGraph validation",
+      "Instance assignment",
+      "Status callback registration",
+      "Completion callback setup",
+      "ValueError handling for missing instances"
+    ],
+    "tags": [
+      "digestor initialization",
+      "exception handling",
+      "callable functions",
+      "object-oriented programming",
+      "python classes",
+      "error raising",
+      "callback mechanisms"
+    ],
+    "sequence_index": 0,
+    "parent_identifier": "ChunkProcessor",
+    "dependencies": [
+      "Digestor",
+      "MemoryGraph",
+      "Callable[[str], None]",
+      "Callable[[bool], None]"
+    ],
+    "produced_outputs": [
+      "digestor",
+      "memory_graph",
+      "status_callback",
+      "completion_callback"
+    ],
+    "follow_up_questions": [],
+    "source": null
+  },
+  "file_processor_python_function_ChunkProcessor__save_graph_4": {
+    "id": "file_processor_python_function_ChunkProcessor__save_graph_4",
+    "raw": "    def _save_graph(self):\n         try:\n            self.memory_graph.save_to_json(MEMORY_GRAPH_PATH)\n         except Exception as e:\n            logging.error(f\"Save graph error: {e}\", exc_info=True)\n            self.status_callback(f\"Status: Error saving memory\")\n",
+    "summary": "The function '_save_graph' attempts to save a memory graph in JSON format and logs an error if it fails.",
+    "key_concepts": [
+      "Memory Graph Saving",
+      "Error Handling",
+      "Logging Error Message",
+      "JSON Serialization",
+      "File Path Specification",
+      "Status Update Callback",
+      "Key Arguments:",
+      "Importance of error handling in file operations.",
+      "Usefulness of logging for debugging purposes.",
+      "Core Terminology:",
+      "Memory Graph",
+      "JSON",
+      "Status Callback",
+      "Logging",
+      "Exception Handling"
+    ],
+    "tags": [
+      "graph serialization",
+      "exception handling",
+      "json file writing",
+      "status callback",
+      "logging",
+      "save operation",
+      "memory management",
+      "python function",
+      "error reporting"
+    ],
+    "sequence_index": 3,
+    "parent_identifier": "ChunkProcessor",
+    "dependencies": [
+      "MEMORY_GRAPH",
+      "MEMORY_GRAPH_PATH",
+      "self.xyz",
+      "logging",
+      "exc_info",
+      "status_callback"
+    ],
+    "produced_outputs": [
+      "memory_graph",
+      "status_callback"
+    ],
+    "follow_up_questions": [],
+    "source": null
+  },
+  "file_processor_python_function_ChunkProcessor__digest_single_chunk_task_2": {
+    "id": "file_processor_python_function_ChunkProcessor__digest_single_chunk_task_2",
+    "raw": "    def _digest_single_chunk_task(self, chunk_data: Dict[str, Any], original_filename: str, index: int) -> Optional[MemoryNode]:\n        \"\"\"Digests a single chunk and adds linking info to the resulting node.\"\"\"\n        node: Optional[MemoryNode] = None\n        chunk_metadata = chunk_data.get(\"metadata\", {})\n        node_id = \"\"\n        try:\n            chunk_content = chunk_data.get(\"content\", \"\")\n            chunk_id_part = chunk_metadata.get(\"identifier\", f\"chunk_{index+1}\")\n            sanitized_chunk_id = re.sub(r'[^\\w\\-]+', '_', chunk_id_part)[:50]\n            base_filename_noext, _ = os.path.splitext(original_filename)\n            node_id = f\"file_{base_filename_noext}_{chunk_metadata.get('type','unknown')}_{sanitized_chunk_id}_{index+1}\"\n\n            logging.info(f\"Attempting digest node ID: {node_id} (Thread: {threading.current_thread().name})\")\n            node = self.digestor.digest(\n                chunk_content,\n                node_id=node_id,\n                chunk_metadata=chunk_metadata, # Pass metadata obj\n                generate_questions=False\n             )\n\n            if node:\n                node.sequence_index = chunk_metadata.get(\"sequence_index\")\n                node.parent_identifier = chunk_metadata.get(\"parent_identifier\")\n                setattr(node, 'source_chunk_metadata', chunk_metadata)\n                logging.info(f\"Success digest node {node_id}\")\n                return node\n            else:\n                logging.warning(f\"Digest returned None chunk {index+1} (Node ID: {node_id})\")\n                return None\n        except Exception as e:\n             log_id = node_id if node_id else f\"chunk_{index+1}\"\n             logging.error(f\"Error digest {log_id}: {e}\", exc_info=True)\n             return None\n",
+    "summary": "The function `_digest_single_chunk_task` processes a single data chunk, generates its unique identifier and metadata-based linkings for it in the form of `MemoryNode`, then attempts to create this node using provided content. If successful or if an error occurs during processing (including digest failure), appropriate logging is performed; otherwise, None is returned indicating unsuccessful completion.",
+    "key_concepts": [
+      "Digest single chunk",
+      "Chunk data processing",
+      "Metadata extraction and sanitization",
+      "Node ID generation",
+      "Logging information flow",
+      "Exception handling",
+      "MemoryNode creation",
+      "Sequence index assignment",
+      "Parent identifier linkage",
+      "KEY ARGUMENTS/CLAIMS:",
+      "Sanitized unique node identification based on metadata and filename.",
+      "Thread-safe logging for debugging purposes.",
+      "CORE TERMINOLOGY/USAGE:",
+      "Dict[str, Any]: Generic dictionary with arbitrary key-value pairs.",
+      "MemoryNode: Custom class representing a memory-based data structure (not defined in snippet).",
+      "digestor.digest(): Method to create or retrieve node based on content and metadata."
+    ],
+    "tags": [
+      "digesting",
+      "memory_node",
+      "chunk_data",
+      "metadata",
+      "sanitization",
+      "os.path",
+      "threading",
+      "exception handling",
+      "log management",
+      "file processing"
+    ],
+    "sequence_index": 1,
+    "parent_identifier": "ChunkProcessor",
+    "dependencies": [
+      "os",
+      "logging",
+      "threading",
+      "MemoryNode",
+      "re",
+      "digestor",
+      "setattr"
+    ],
+    "produced_outputs": [
+      "node",
+      "node_id",
+      "sequence_index",
+      "parent_identifier",
+      "source_chunk_metadata"
+    ],
+    "follow_up_questions": [],
+    "source": null
+  },
+  "file_processor_python_function_ChunkProcessor_process_chunks_3": {
+    "id": "file_processor_python_function_ChunkProcessor_process_chunks_3",
+    "raw": "    def process_chunks(self, chunks: List[Dict[str, Any]], original_filename: str):\n         total_chunks = len(chunks)\n         nodes_to_add: List[MemoryNode] = []\n         max_workers = min(8, os.cpu_count() + 4) if os.cpu_count() else 8\n         if total_chunks == 0: \n            logging.info(\"No chunks.\")\n            self.status_callback(\"Status: No chunks.\")\n            self.completion_callback(False)\n            return\n\n         logging.info(f\"Processor start parallel digest ({total_chunks} chunks, max {max_workers} workers).\")\n         self.status_callback(f\"Status: Starting digestion ({total_chunks} chunks)...\")\n         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix='DigestWorker') as executor:\n             future_to_chunk_index = { executor.submit(self._digest_single_chunk_task, chunk, original_filename, i): i for i, chunk in enumerate(chunks) }\n             processed_chunks = 0\n             for future in concurrent.futures.as_completed(future_to_chunk_index):\n                 chunk_index = future_to_chunk_index[future]\n                 try:\n                    node = future.result()\n                    (nodes_to_add.append(node) if node else None)\n                 except Exception as exc: logging.error(f'Chunk task {chunk_index + 1} generated exception: {exc}', exc_info=True)\n                 processed_chunks += 1\n                 if processed_chunks % 5 == 0 or processed_chunks == total_chunks: self.status_callback(f\"Status: Digested {processed_chunks}/{total_chunks} chunks...\")\n\n         logging.info(f\"Processor finished. {len(nodes_to_add)}/{total_chunks} chunks yielded nodes.\")\n         graph_changed = False\n         if nodes_to_add:\n             logging.info(f\"Adding {len(nodes_to_add)} nodes to MemoryGraph.\")\n             graph_changed = True\n             for node in nodes_to_add: self.memory_graph.add_node(node)\n             self._save_graph()\n         final_status = f\"Status: Finished {original_filename}. Added {len(nodes_to_add)}/{total_chunks} nodes.\"\n         final_status += \" (Check logs)\" if len(nodes_to_add) < total_chunks else \"\"\n         self.status_callback(final_status); self.completion_callback(graph_changed)\n",
+    "summary": "The function processes a list of data chunks in parallel, computes their digest values using multiple workers based on CPU count or default to 8, and updates the memory graph with new nodes derived from these processed chunks.",
+    "key_concepts": [
+      "process_chunks function",
+      "List[Dict[str, Any]]",
+      "original_filename parameter",
+      "Total chunks calculation",
+      "Nodes to add list initialization",
+      "Max workers determination based on CPU count or default value of 8",
+      "Logging and status callbacks for no-chunk scenario",
+      "Parallel processing with ThreadPoolExecutor using max_workers limit",
+      "Digest single chunk task submission via concurrent.futures",
+      "Handling exceptions during future results retrieval",
+      "Progress logging every processed_chunk incremented by 5, total_chunks completion check",
+      "Finalization: log success/failure of node addition to MemoryGraph and save graph state",
+      "Completion callback with final status update"
+    ],
+    "tags": [
+      "concurrent.futures",
+      "threading",
+      "multiprocessing",
+      "logging",
+      "exception handling",
+      "memory graph",
+      "digesting",
+      "chunk processing",
+      "os.cpu_count",
+      "thread pool executor",
+      "python code",
+      "parallel computing",
+      "data structures",
+      "task scheduling",
+      "error reporting",
+      "concurrent programming",
+      "asynchronous execution",
+      "node addition",
+      "file I/O operations",
+      "process management",
+      "dynamic worker allocation"
+    ],
+    "sequence_index": 2,
+    "parent_identifier": "ChunkProcessor",
+    "dependencies": [
+      "os",
+      "concurrent.futures",
+      "logging",
+      "MemoryNode",
+      "self._digest_single_chunk_task",
+      "self.memory_graph.add_node",
+      "self.status_callback",
+      "self.completion_callback",
+      "self._save_graph"
+    ],
+    "produced_outputs": [
+      "nodes_to_add",
+      "graph_changed",
+      "final_status"
     ],
     "follow_up_questions": [],
     "source": null
