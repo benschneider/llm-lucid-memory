@@ -1,5 +1,5 @@
 fastapi
 uvicorn
-requests
-PyYAML
+requests>=2.25.0
+PyYAML>=5.0
 streamlit
