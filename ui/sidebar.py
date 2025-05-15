@@ -27,31 +27,31 @@ def render_sidebar(controller: 'LucidController', session_state: st.session_stat
 
             # --- API Type Selection ---
             available_api_types = list(api_presets.keys())
-            # Read selection from session state for persistence across reruns within form interaction
             selected_api_type = session_state.get('selected_api_type', current_config.get('api_type', 'Ollama'))
-            if selected_api_type not in available_api_types: selected_api_type = available_api_types[0] # Default check
+            # if selected_api_type not in available_api_types: selected_api_type = available_api_types[0]
 
             selected_api_type_widget = st.selectbox(
                 "API Type:", options=available_api_types,
                 index=available_api_types.index(selected_api_type),
-                key="sb_api_type_select" # Use within-form key
+                key="sb_api_type_select"
             )
 
             # --- Determine Defaults Based on Selection ---
             preset_for_selected = api_presets.get(selected_api_type_widget, {})
-            api_key_needed = preset_for_selected.get("needs_key", False)
-            # Default URL from preset IF type changed, else use current saved config
             backend_url_value = preset_for_selected.get("url", "") if selected_api_type_widget != selected_api_type else current_config.get('backend_url', '')
-            # Default API key only from saved config (clear if type changes and needed)
-            api_key_value = "" if selected_api_type_widget != selected_api_type and api_key_needed else current_config.get('api_key', '')
+            api_key_value = current_config.get('api_key', '')
 
 
             # --- Input Fields ---
-            conf_backend_url = st.text_input("API Backend URL:", value=backend_url_value, key="ft_conf_url")
+            conf_backend_url = st.text_input(
+                "API Backend URL:", value=backend_url_value, key="ft_conf_url",
+                help="URL for the chat completions endpoint. Other endpoints (e.g., model list) are derived."
+                )
 
-            conf_api_key = ""
-            if api_key_needed:
-                 conf_api_key = st.text_input("🔑 API Key:", type="password", value=api_key_value, key="ft_api_key")
+            conf_api_key = st.text_input(
+                "🔑 API Key (Optional):", type="password", value=api_key_value, key="ft_api_key",
+                help="Enter API key if required by your backend URL/Preset."
+            )
 
             # --- Model Selection ---
             available_models = controller.get_available_models()
@@ -76,20 +76,18 @@ def render_sidebar(controller: 'LucidController', session_state: st.session_stat
 
             # --- Handle Form SUBMIT --- (Only runs block IF submit button clicked..)
             if form_submitted:
-                # Read state FROM Widgets *inside* FORM scope -> ENSURE accurate values.. ok.
-                final_api_type = selected_api_type_widget # Use the selected TYPE from 'selectbox' Not session state var.. OK.
-                # --> Get values entered / selected just before Submit ---> SAFE.
+
                 config_to_save = {
-                    "api_type": final_api_type,
+                    "api_type": selected_api_type_widget, #final_api_type,
                     "backend_url": conf_backend_url,
                     "model_name": conf_model_name if conf_model_name != "(No Models Available)" else "",
                     "local_proxy_port": int(conf_proxy_port),
-                    "api_key": conf_api_key if api_key_needed else "" # Only save key if relevant INPUT was visible ok logic..
+                    "api_key": conf_api_key,
                 }
                 logging.info(f"Applying Configuration Save...") # Remove Dict Log maybe cleaner no need.. OK..
                 with st.spinner("Saving..."):
                     if controller.update_config(config_to_save):
-                        session_state.selected_api_type = final_api_type # <<<---- UpdateSESSION State *AFTER* successful Save/Apply completes --->>> OK Pattern>..!
+                        session_state.selected_api_type = selected_api_type_widget #final_api_type
                         st.success("✅ Configuration Saved!")
                         st.rerun() # Force refresh UI Reflect -> Component Status reloads.. etc Models List refreshed..
                     else:

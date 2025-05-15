@@ -6,22 +6,21 @@
 ---
 
 ## 📚 Table of Contents
-- [Vision: The Reasoning Graph](#-vision-the-reasoning-graph)
 - [Why Lucid Memory?](#-why-lucid-memory)
+- [Vision: The Reasoning Graph](#-vision-the-reasoning-graph)
 - [Core Concept: Graph-Based Reasoning](#-core-concept-graph-based-reasoning)
 - [Enhanced Digestion Process](#-enhanced-digestion-process-chunking--pre-processing)
-    - [Text Document Digestion](#text-document-digestion)
-    - [Code Digestion (Python Example)](#code-digestion-python-example)
-- [Core Reasoning Flow](#-core-reasoning-flow)
-- [Quick Start](#-quick-start)
-- [Example Usage](#-example-usage)
-- [v0.3 Roadmap: Building the Graph Foundation](#%EF%B8%8F-v03-roadmap-building-the-graph-foundation)
-- [Advanced Research Directions](#-advanced-research-directions)
-- [License](#-license)
+  - [Text Document Digestion](#text-document-digestion-eg-markdown)
+  - [Code Digestion (Python Example)](#code-digestion-python-example)
+- [Core Reasoning Flow](#-core-reasoning-flow-conceptual-v03)
+- [Quickstart: Lucid Memory in 60 Seconds](#-quickstart-lucid-memory-in-60-seconds)
 - [How to Use with Local LLMs](#-how-to-use-with-local-llms-ollama-lmstudio-etc)
-- [Current Status and Next Steps (v0.2.x)](#-current-status-and-next-steps-v02x)
+- [Example Usage](#-example-usage)
+- [Future Optimization: Monte Carlo Chain Voting for Memory Refinement](#-future-optimization-monte-carlo-chain-voting-for-memory-refinement)
+- [v0.3 Roadmap: Building the Graph Foundation](#-v03-roadmap-building-the-graph-foundation)
+- [Tests](#-tests)
 - [Project Structure](#-project-structure)
-
+- [License](#-license)
 ---
 
 # 🧠 llm-lucid-memory
@@ -29,161 +28,6 @@
 **Lucid Memory** is an open-source project evolving towards a **reasoning graph** for LLMs. It enables smaller models to comprehend and reason about large codebases and document sets by breaking them into understandable chunks, pre-processing the logic within each chunk, and connecting them structurally.
 
 > **Imagine:** Your LLM navigating a graph of interconnected concepts and code logic, not just processing isolated text snippets.
-
----
-
-## 🚀 Quickstart: Lucid Memory in 60 Seconds
-
-After installation:
-
-```bash
-pip install llm-lucid-memory
-```
-
-You can immediately launch the full Lucid Memory interface with a single command:
-
-```bash
-lucid-memory
-```
-
-✅ No manual setup needed  
-✅ Configure your local LLM if needed (Ollama, LMStudio, or external API)  
-✅ Load a file (.md, .py, .txt)  
-✅ Watch Lucid Memory chunk, digest, and prepare structured memories dynamically!
-
-The UI allows you to:
-- Load and chunk documents
-- Digest chunks using your LLM backend
-- View the digested MemoryNodes
-- Test basic chat with digested memories
-- Inspect raw JSON memory output
-
-> **Note:**  
-> The current GUI is built with lightweight Tkinter for rapid prototyping.  
-> A more advanced, modern GUI (likely based on a web framework) is planned in upcoming versions to better support graph navigation and memory visualization. 🚀
-
-
-### Dependencies:
-
-```bash
-pip install -r requirements.txt
-# (Requires: fastapi, uvicorn, requests, PyYAML)
-```
-
-#### Configuration:
-
-1. Copy or rename lucid_memory/proxy_config.example.json to lucid_memory/proxy_config.json.
-2. Edit lucid_memory/proxy_config.json with your local LLM API endpoint (e.g., Ollama, LMStudio v1 compatible) and the desired model name.
-3. (Optional) Edit lucid_memory/prompts.yaml to customize LLM instructions.
-
-
-### Run the GUI:
-
-Start a UI to configure and start a Proxy Server for LLM interaction:
-```bash 
-python -m lucid_memory.gui
-```
-
-#### From the GUI
-
-1. Verify configuration.
-2. Click "Load Context File" to select a file (.md, .py, .txt) for chunking and digestion (can take time).
-3. Click "Start Proxy Server".
-4. Use the Chat interface to ask questions related to your loaded context.
-
-### For development:
-
-Run tests: 
-```bash 
-pytest 
-```
-*(Note: Tests need updating for chunking/new digestion process)*
-
-Run a simple ingestion demo: 
-```bash 
-python -m examples.simple_digest_demo ```
-```
----
-
-## 🔌 How to Use with Local LLMs (Ollama, LMStudio, etc.)
-
-- Start your local LLM server (ensure it exposes an OpenAI-compatible API endpoint).
-- Edit `lucid_memory/proxy_config.json`:
-    - Set `backend_url` to your LLM's API endpoint (e.g., `http://localhost:11434/v1/chat/completions`).
-    - Set `model_name` to the identifier your local LLM uses.
-- Launch the Lucid Memory GUI: `python -m lucid_memory.gui`
-- Use the GUI to "Load Context File" (this performs chunking & digestion).
-- Start the Proxy Server via the GUI button.
-- Chat using the GUI's chat interface. The proxy injects graph-retrieved context.
-
----
-
-## 🧪 Example Usage
-
-*(Note: Examples are still in development. Current demos focus on basic chunking and digestion.)*
-
-**(Conceptual Example with Digested Code)**
-
-**Digested Node (Function Chunk):**
-*   **ID:** `file_server_utils_py_func_start_secure_server_1`
-*   **Summary:** Starts a server socket, binds to a port, and wraps connections with TLS for secure communication.
-*   **Logical Steps:**
-    *   Create TCP socket.
-    *   Set socket options (e.g., reuse address).
-    *   Bind socket to host and port.
-    *   Listen for incoming connections.
-    *   Load TLS certificate and key.
-    *   Create TLS context.
-    *   Enter main loop: accept connection.
-    *   Wrap accepted socket with TLS context.
-    *   Handle client request over TLS (delegate).
-*   **Key Variables:** `input: port (int)`, `input: certfile (str)`, `input: keyfile (str)`, `internal: sock (socket)`, `internal: context (SSLContext)`, `internal: conn (socket)`
-*   **Tags:** `server`, `socket`, `network`, `tls`, `ssl`, `security`, `listener`
-
-**User Question:**
-“How are secure connections handled when the server starts?”
-
-**Graph Retrieval:**
-1.  Keyword search finds `file_server_utils_py_func_start_secure_server_1`.
-2.  (Future) Graph traversal might pull related nodes if referenced.
-
-**Proxy Prompt Context (Simplified):**
-
-Relevant Memory:
---- Memory 1 (ID: file_server_utils_py_func_start_secure_server_1) ---
-Summary: Starts a server socket, binds to a port, and wraps connections with TLS for secure communication.
-Key Concepts/Logic:
-
-- Create TCP socket
-- Bind socket to host and port
-- Listen for incoming connections
-- Load TLS certificate and key
-- Create TLS context
-- Accept connection
-- Wrap accepted socket with TLS context
-- Handle client request over TLS
-
-Tags: server, socket, network, tls, ssl, security
-
-
-Based ONLY on the memories provided, answer:
-Question: How are secure connections handled when the server starts?
-
-
-**LLM Drafted Answer:**
-The server handles secure connections by: loading a TLS certificate/key, creating a TLS context, accepting incoming connections, and then wrapping the connection socket with the TLS context before handling the client request.
-
-
-## ✨ Vision: The Reasoning Graph
-
-We are building a system that allows LLMs to:
-    - **Chunk** large documents and codebases into meaningful, context-aware units (sections, functions, classes).
-    - **Digest** each chunk to extract not just summaries, but **pre-processed understanding** (like logical steps in code) using LLMs.
-    - **Connect** these digested chunks (Memory Nodes) into a **graph** representing structural and potentially logical relationships.
-    - **Retrieve** knowledge not just by keywords or semantic similarity, but by **traversing the graph** to gather relevant, linked context.
-    - **Reason** over this structured, interconnected knowledge graph, enabling deeper comprehension and more accurate outputs, even with limited context windows.
-
-Helping small models think big by building structured, navigable "mental models" of information. 🚀
 
 ---
 
@@ -195,6 +39,19 @@ Helping small models think big by building structured, navigable "mental models"
 - **Code Comprehension:** Specifically designed to pre-process and understand the logic within code functions/classes.
 - **Efficient Retrieval:** Graph traversal allows targeted retrieval of necessary linked context.
 - **Modular & Extensible:** Core components (chunker, digestor, graph, retriever) are designed for flexibility.
+
+---
+
+## ✨ Vision: The Reasoning Graph
+
+We are building a system that allows LLMs to:
+    - **Chunk** large documents and codebases into meaningful, context-aware units (sections, functions, classes).
+    - **Digest** each chunk to extract not just summaries, but **pre-processed understanding** (like logical steps in code) using LLMs.
+    - **Connect** these digested chunks (Memory Nodes) into a **graph** representing structural and potentially logical relationships.
+    - **Retrieve** knowledge not just by keywords or semantic similarity, but by **traversing the graph** to gather relevant, linked context.
+    - **Reason** over this structured, interconnected knowledge graph, enabling deeper comprehension and more accurate outputs, even with limited context windows.
+
+Helping small models think big by building structured, navigable "mental models" of information. 🚀
 
 ---
 
@@ -301,7 +158,7 @@ flowchart TD
 
   %% Query Phase (📝 Todo)
   subgraph Query Phase
-    H --> I{Graph Retriever 
+    H --> I{Graph Retriever
     Search + Traversal}
     G2 --> I
     I --> J[Collect Relevant Context Nodes]
@@ -331,7 +188,159 @@ flowchart TD
 
 ---
 
-## 🧠 Advanced Research Directions
+## 🚀 Quickstart: Lucid Memory in 60 Seconds
+
+After installation:
+
+```bash
+pip install llm-lucid-memory
+```
+
+You can immediately launch the full Lucid Memory interface with a single command:
+
+```bash
+lucid-memory
+```
+
+✅ No manual setup needed  
+✅ Configure your local LLM if needed (Ollama, LMStudio, or external API)  
+✅ Load a file (.md, .py, .txt)  
+✅ Watch Lucid Memory chunk, digest, and prepare structured memories dynamically!
+
+The UI allows you to:
+- Load and chunk documents
+- Digest chunks using your LLM backend
+- View the digested MemoryNodes
+- Test basic chat with digested memories
+- Inspect raw JSON memory output
+
+> **Note:**  
+> The current GUI is built with lightweight Tkinter for rapid prototyping.  
+> A more advanced, modern GUI (likely based on a web framework) is planned in upcoming versions to better support graph navigation and memory visualization. 🚀
+
+
+### Dependencies:
+
+```bash
+pip install -r requirements.txt
+# (Requires: fastapi, uvicorn, requests, PyYAML)
+```
+
+#### Configuration:
+
+1. Copy or rename lucid_memory/proxy_config.example.json to lucid_memory/proxy_config.json.
+2. Edit lucid_memory/proxy_config.json with your local LLM API endpoint (e.g., Ollama, LMStudio v1 compatible) and the desired model name.
+3. (Optional) Edit lucid_memory/prompts.yaml to customize LLM instructions.
+
+
+### Run the GUI:
+
+Start a UI to configure and start a Proxy Server for LLM interaction:
+```bash 
+streamlit run streamlit_app.py
+```
+
+#### From the GUI
+
+1. Verify configuration.
+2. Click "Load Context File" to select a file (.md, .py, .txt) for chunking and digestion (can take time).
+3. Click "Start Proxy Server".
+4. Use the Chat interface to ask questions related to your loaded context.
+
+### For development:
+
+Run tests:
+```bash
+pytest
+```
+*(Note: Tests need updating for chunking/new digestion process)*
+
+Run a simple ingestion demo:
+```bash
+python -m examples.simple_digest_demo ```
+```
+---
+
+## 🔌 How to Use with Local LLMs (Ollama, LMStudio, etc.)
+
+- Start your local LLM server (ensure it exposes an OpenAI-compatible API endpoint).
+- Edit `lucid_memory/proxy_config.json`:
+    - Set `backend_url` to your LLM's API endpoint (e.g., `http://localhost:11434/v1/chat/completions`).
+    - Set `model_name` to the identifier your local LLM uses.
+- Launch the Lucid Memory GUI: `python -m lucid_memory.gui`
+- Use the GUI to "Load Context File" (this performs chunking & digestion).
+- Start the Proxy Server via the GUI button.
+- Chat using the GUI's chat interface. The proxy injects graph-retrieved context.
+
+---
+
+## 🧪 Example Usage
+
+- Start your local LLM server (ensure it exposes an OpenAI-compatible API endpoint).
+- Edit `lucid_memory/proxy_config.json`:
+    - Set `backend_url` to your LLM's API endpoint (e.g., `http://localhost:11434/v1/chat/completions`).
+    - Set `model_name` to the identifier your local LLM uses.
+- Launch the Lucid Memory GUI: `python -m lucid_memory.gui`
+- Use the GUI to "Load Context File" (this performs chunking & digestion).
+- Start the Proxy Server via the GUI button.
+- Chat using the GUI's chat interface. The proxy injects graph-retrieved context.
+
+---
+
+*(Note: Examples are still in development. Current demos focus on basic chunking and digestion.)*
+
+**(Conceptual Example with Digested Code)**
+
+**Digested Node (Function Chunk):**
+*   **ID:** `file_server_utils_py_func_start_secure_server_1`
+*   **Summary:** Starts a server socket, binds to a port, and wraps connections with TLS for secure communication.
+*   **Logical Steps:**
+    *   Create TCP socket.
+    *   Set socket options (e.g., reuse address).
+    *   Bind socket to host and port.
+    *   Listen for incoming connections.
+    *   Load TLS certificate and key.
+    *   Create TLS context.
+    *   Enter main loop: accept connection.
+    *   Wrap accepted socket with TLS context.
+    *   Handle client request over TLS (delegate).
+*   **Key Variables:** `input: port (int)`, `input: certfile (str)`, `input: keyfile (str)`, `internal: sock (socket)`, `internal: context (SSLContext)`, `internal: conn (socket)`
+*   **Tags:** `server`, `socket`, `network`, `tls`, `ssl`, `security`, `listener`
+
+**User Question:**
+"How are secure connections handled when the server starts?"
+
+**Graph Retrieval:**
+1.  Keyword search finds `file_server_utils_py_func_start_secure_server_1`.
+2.  (Future) Graph traversal might pull related nodes if referenced.
+
+**Proxy Prompt Context (Simplified):**
+
+Relevant Memory:
+--- Memory 1 (ID: file_server_utils_py_func_start_secure_server_1) ---
+Summary: Starts a server socket, binds to a port, and wraps connections with TLS for secure communication.
+Key Concepts/Logic:
+
+- Create TCP socket
+- Bind socket to host and port
+- Listen for incoming connections
+- Load TLS certificate and key
+- Create TLS context
+- Accept connection
+- Wrap accepted socket with TLS context
+- Handle client request over TLS
+
+Tags: server, socket, network, tls, ssl, security
+
+
+Based ONLY on the memories provided, answer:
+Question: How are secure connections handled when the server starts?
+
+
+**LLM Drafted Answer:**
+The server handles secure connections by: loading a TLS certificate/key, creating a TLS context, accepting incoming connections, and then wrapping the connection socket with the TLS context before handling the client request.
+
+
 
 ### 🧠 Future Optimization: Monte Carlo Chain Voting for Memory Refinement
 
@@ -417,4 +426,4 @@ llm-lucid-memory/
 
 ## 📜 License
 
-Apache 2.0 — free for commercial and research use with attribution.
+Apache 2.0 - free for commercial and research use with attribution.

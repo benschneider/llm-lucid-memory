@@ -1,7 +1,0 @@
-{
-  "api_type": "Ollama",
-  "backend_url": "http://localhost:11434/v1/chat/completions",
-  "model_name": "hf.co/unsloth/Phi-4-mini-instruct-GGUF:Q4_K_M",
-  "local_proxy_port": 8000,
-  "api_key": ""
-}

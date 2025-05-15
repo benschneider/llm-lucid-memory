@@ -24,7 +24,8 @@ API_PRESETS = { # Keep presets defined alongside config logic
     "LM Studio": {"url": "http://localhost:1234/v1/chat/completions", "needs_key": False, "list_endpoint": "/v1/models", "name_key": "id"},
     "OpenAI": {"url": "https://api.openai.com/v1/chat/completions", "needs_key": True, "list_endpoint": "/v1/models", "name_key": "id"},
     "OpenRouter": {"url": "https://openrouter.ai/api/v1/chat/completions", "needs_key": True, "list_endpoint": "/v1/models", "name_key": "id"},
-    "Custom": {"url": "", "needs_key": False, "list_endpoint": None, "name_key": None}
+    "Llama API": {"url": "https://api.llama.com/v1/chat/completions", "needs_key": True, "list_endpoint": "/v1/models", "name_key": "id"},
+    "Custom": {"url": "", "needs_key": True, "list_endpoint": None, "name_key": None}
 }
 
 
