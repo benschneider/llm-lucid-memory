@@ -5,8 +5,8 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name="llm-lucid-memory",
-    version="0.2.4",
-    description="Lucid Memory - Modular reasoning graph for LLMs",
+    version="0.2.5", 
+    description="Lucid Memory - Modular reasoning graph for LLMs with a unified API server.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Ben Schneider",
@@ -18,15 +18,14 @@ setup(
     },
     packages=find_packages(include=['lucid_memory', 'lucid_memory.*']),
     package_data={
-         'lucid_memory': ['prompts.yaml', 'proxy_config.example.json'],
+         'lucid_memory': ['prompts.yaml', 'proxy_config.example.json', 'proxy_config.json'],
     },
     include_package_data=True,
     install_requires=[
-        "fastapi>=0.90.0",      # FastAPI for proxy
-        "uvicorn",              # Uvicorn for running proxy
-        "requests>=2.25.0",     # For LLM calls
-        "PyYAML>=5.0",          # For prompts.yaml
-        "streamlit>=1.20.0"     # For the new UI
+        "fastapi,      
+        "uvicorn, 
+        "requests>=2.25.0",
+        "PyYAML>=5.0",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -44,7 +43,7 @@ setup(
     python_requires='>=3.8',
     entry_points={
         'console_scripts': [
-            'lucid-memory=lucid_memory.cli:run_streamlit',
+            'lucid-memory-server=lucid_memory.server_runner:main', 
         ],
     },
 )
