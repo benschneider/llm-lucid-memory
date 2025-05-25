@@ -237,11 +237,12 @@ async def ollama_compatible_chat_proxy(request: OllamaChatRequest):
         # Fall through to non-streaming logic, client might handle it.
         # Or raise HTTPException(status_code=501, detail="Streaming responses not implemented by this proxy.")
 
-    user_message_content = ""
-    if request.messages[-1].role == "user":
-        user_message_content = request.messages[-1].content
-    if not user_message_content.strip():
-        raise HTTPException(status_code=400, detail="Last message must be from 'user' and non-empty.")
+    chat_history_for_retriever = []
+    if request.messages:
+        chat_history_for_retriever = [{"role": msg.role, "content": msg.content} for msg in request.messages]
+        user_message_content = chat_history_for_retriever[-1]["content"] # Ensure user_message_content is still the latest
+    else:
+        raise HTTPException(status_code=400, detail="Messages list cannot be empty.")
 
     try:
         # Step 1: Initial keyword-based retrieval
@@ -259,11 +260,12 @@ async def ollama_compatible_chat_proxy(request: OllamaChatRequest):
             # It should be less than or equal to the display limit later.
             max_graph_context_nodes = 7  # How many related nodes to pull in total
             final_context_nodes = retriever_for_proxy.retrieve_graph_context(
-                best_initial_nodes,
-                user_message_content,
+                initial_nodes=best_initial_nodes, # Pass the refined list
+                query=user_message_content, # Current user query
+                chat_history=chat_history_for_retriever,
                 max_neighbors_to_include=max_graph_context_nodes
             )
-            logger.info(f"Proxy: GraphRAG expanded to {len(final_context_nodes)} contextual nodes.")
+            logger.info(f"Proxy: GraphRAG (with history awareness placeholder) expanded to {len(final_context_nodes)} contextual nodes.")
         else:
             final_context_nodes = []  # No initial nodes, so no graph context
             logger.info("Proxy: No initial nodes found, skipping GraphRAG expansion.")

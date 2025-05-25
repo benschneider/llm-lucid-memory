@@ -83,92 +83,117 @@ class ReflectiveRetriever:
     def retrieve_graph_context(
         self,
         initial_nodes: List[MemoryNode],
-        query: str,  # Keep query for potential future relevance scoring of neighbors
-        max_depth: int = 1,  # How many steps to explore (1 means direct parent/siblings)
-        max_neighbors_to_include: int = 5  # Max total nodes to return including initial
+        query: str,
+        chat_history: Optional[List[Dict[str, str]]] = None,
+        max_depth: int = 1,
+        max_neighbors_to_include: int = 7
     ) -> List[MemoryNode]:
         """
         Expands the context from an initial set of nodes by exploring the graph.
-        Retrieves parents and sequential siblings of the initial nodes.
-
-        Args:
-            initial_nodes: A list of MemoryNode objects that are initially relevant.
-            query: The user's query string (for potential future use in ranking neighbors).
-            max_depth: Not fully implemented for complex traversal yet, conceptual.
-            max_neighbors_to_include: Limits the total number of nodes returned.
-
-        Returns:
-            A de-duplicated list of MemoryNode objects including initial and context nodes,
-            potentially re-sorted or prioritized.
+        Retrieves parents, sequential siblings, and nodes linked by dependency/output fields.
         """
         if not initial_nodes:
             return []
 
-        # Use a set to keep track of node IDs to ensure uniqueness and avoid cycles
-        contextual_nodes_ids = set(node.id for node in initial_nodes)
-        # Use a list to maintain some order, starting with initial nodes
-        # (Order might be lost due to set operations later, or re-established by sorting)
-        all_relevant_nodes_map = {node.id: node for node in initial_nodes}
+        contextual_nodes_ids = set()
+        all_relevant_nodes_map = {}
 
-        # For each initial node, find its parent and direct sequential siblings
-        nodes_to_explore_further = list(initial_nodes)  # Start with initial nodes
+        # Prioritize initial_nodes
+        for node in initial_nodes:
+            if node.id not in contextual_nodes_ids:
+                all_relevant_nodes_map[node.id] = node
+                contextual_nodes_ids.add(node.id)
+                if len(all_relevant_nodes_map) >= max_neighbors_to_include:
+                    break
+
+        # If we haven't filled up max_neighbors_to_include, then explore
+        nodes_to_explore_from = list(all_relevant_nodes_map.values())
 
         # Simple 1-hop exploration for now
-        for current_node in nodes_to_explore_further:
+        for current_node in nodes_to_explore_from: # Iterate over a copy if modifying during iteration
             if len(all_relevant_nodes_map) >= max_neighbors_to_include:
-                break  # Stop if we've gathered enough context
+                break
 
-            # 1. Get Parent Node
+            # 1. Get Parent Node (existing logic is fine)
             if current_node.parent_identifier:
                 parent_node = self.memory_graph.get_node(current_node.parent_identifier)
                 if parent_node and parent_node.id not in contextual_nodes_ids:
                     logger.debug(f"GraphRAG: Adding parent '{parent_node.id}' for node '{current_node.id}'")
                     all_relevant_nodes_map[parent_node.id] = parent_node
                     contextual_nodes_ids.add(parent_node.id)
-                    # Do not add parent to nodes_to_explore_further to avoid deep dives in this simple version
+                    if len(all_relevant_nodes_map) >= max_neighbors_to_include: break
 
-            if len(all_relevant_nodes_map) >= max_neighbors_to_include:
-                break
-
-            # 2. Get Sequential Siblings (nodes with same parent and adjacent sequence_index)
+            # 2. Get Sequential Siblings (existing logic is fine)
             if current_node.parent_identifier and current_node.sequence_index is not None:
-                # Iterate through all nodes to find siblings - can be optimized if graph stores parent-child explicitly
                 for potential_sibling in self.memory_graph.nodes.values():
-                    if len(all_relevant_nodes_map) >= max_neighbors_to_include:
-                        break
-                    if potential_sibling.id == current_node.id:
-                        continue  # Skip self
-
+                    if len(all_relevant_nodes_map) >= max_neighbors_to_include: break
+                    if potential_sibling.id == current_node.id or potential_sibling.id in contextual_nodes_ids:
+                        continue
                     if potential_sibling.parent_identifier == current_node.parent_identifier and \
                        potential_sibling.sequence_index is not None:
-                        # Check for previous sibling
-                        if potential_sibling.sequence_index == current_node.sequence_index - 1 and \
-                           potential_sibling.id not in contextual_nodes_ids:
-                            logger.debug(f"GraphRAG: Adding prev sibling '{potential_sibling.id}' for node '{current_node.id}'")
+                        if abs(potential_sibling.sequence_index - current_node.sequence_index) == 1:
+                            logger.debug(f"GraphRAG: Adding sibling '{potential_sibling.id}' for node '{current_node.id}'")
                             all_relevant_nodes_map[potential_sibling.id] = potential_sibling
                             contextual_nodes_ids.add(potential_sibling.id)
-                            # Do not add siblings to nodes_to_explore_further in this simple version
+                if len(all_relevant_nodes_map) >= max_neighbors_to_include: break
 
-                        # Check for next sibling
-                        if potential_sibling.sequence_index == current_node.sequence_index + 1 and \
-                           potential_sibling.id not in contextual_nodes_ids:
-                            logger.debug(f"GraphRAG: Adding next sibling '{potential_sibling.id}' for node '{current_node.id}'")
-                            all_relevant_nodes_map[potential_sibling.id] = potential_sibling
-                            contextual_nodes_ids.add(potential_sibling.id)
-                            # Do not add siblings to nodes_to_explore_further
+            # 3. ADDED: Explore 'dependencies' and 'produced_outputs' as potential node links
+            # This assumes these fields might contain IDs of other nodes.
+            linked_node_ids_to_check = []
+            if hasattr(current_node, 'dependencies') and current_node.dependencies:
+                linked_node_ids_to_check.extend(current_node.dependencies)
+            if hasattr(current_node, 'produced_outputs') and current_node.produced_outputs:
+                linked_node_ids_to_check.extend(current_node.produced_outputs)
 
-        # Convert map back to list
+            for linked_id in set(linked_node_ids_to_check): # Use set to avoid processing same ID multiple times from deps/outputs
+                if len(all_relevant_nodes_map) >= max_neighbors_to_include:
+                    break
+                if linked_id == current_node.id or linked_id in contextual_nodes_ids: # Avoid self-loops or already added
+                    continue
+
+                # Heuristic: Check if linked_id looks like a node ID we might have generated
+                # (e.g., contains typical separators like '_', or is in memory_graph.nodes)
+                # For now, we directly try to fetch it.
+                linked_node = self.memory_graph.get_node(linked_id)
+                if linked_node: # If it's a valid node ID in our graph
+                    logger.debug(f"GraphRAG: Adding linked node '{linked_node.id}' (from deps/outputs) for node '{current_node.id}'")
+                    all_relevant_nodes_map[linked_id] = linked_node
+                    contextual_nodes_ids.add(linked_id)
+            if len(all_relevant_nodes_map) >= max_neighbors_to_include: break
+
         final_context_nodes = list(all_relevant_nodes_map.values())
 
-        # Optional: Re-sort the nodes. A simple sort could be by original file sequence if available.
-        # For now, the order will be somewhat arbitrary based on discovery.
-        # A more sophisticated approach would rank them by relevance to the query or structural importance.
-        # Example sort by sequence_index (if all from same parent, or if sequence is global)
-        # This assumes sequence_index is globally meaningful or nodes are primarily from one context.
-        final_context_nodes.sort(key=lambda n: (
-            n.parent_identifier or "",  # Group by parent first
-            n.sequence_index if n.sequence_index is not None else float('inf')  # Then by sequence
-        ))
+        # Refined Sorting:
+        # 1. Start with initial_nodes (if they are part of the final_context_nodes)
+        # 2. Then, sort other nodes perhaps by parent and sequence.
+        # This ensures the directly relevant nodes from keyword search come first.
 
-        logger.info(f"GraphRAG: Expanded {len(initial_nodes)} initial nodes to {len(final_context_nodes)} total contextual nodes.")
-        return final_context_nodes[:max_neighbors_to_include]  # Ensure max limit
+        sorted_final_nodes = []
+        initial_node_ids = {n.id for n in initial_nodes}
+
+        # Add initial nodes first, in their original reflected order (if they survived the max_neighbors cut)
+        for node in initial_nodes:
+            if node.id in all_relevant_nodes_map:
+                sorted_final_nodes.append(all_relevant_nodes_map[node.id])
+
+        # Add other contextual nodes, sorted structurally
+        other_contextual_nodes = [
+            n for n in final_context_nodes if n.id not in initial_node_ids
+        ]
+        other_contextual_nodes.sort(key=lambda n: (
+            n.parent_identifier or "",
+            n.sequence_index if n.sequence_index is not None else float('inf')
+        ))
+        sorted_final_nodes.extend(other_contextual_nodes)
+
+        # De-duplicate again just in case (though map should handle it)
+        # and ensure the final list is unique by ID while trying to preserve the new order
+        seen_ids_for_sort = set()
+        truly_final_nodes = []
+        for node in sorted_final_nodes:
+            if node.id not in seen_ids_for_sort:
+                truly_final_nodes.append(node)
+                seen_ids_for_sort.add(node.id)
+
+        logger.info(f"GraphRAG: Expanded to {len(truly_final_nodes)} total contextual nodes from {len(initial_nodes)} initial. Query: '{query[:50]}...'")
+        return truly_final_nodes[:max_neighbors_to_include]
