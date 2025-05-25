@@ -14,7 +14,7 @@ from .memory_graph import MemoryGraph
 from .retriever import ReflectiveRetriever
 from .memory_node import MemoryNode
 from .config_manager import ConfigManager
-from .chunker import chunk as lib_chunk_content # For the /chunk endpoint
+from .chunker import chunk as lib_chunk_content
 
 # Setup basic logging
 # Application-level logging configuration should ideally be in the runner script.
@@ -206,7 +206,7 @@ class OllamaChatRequest(BaseModel):
     messages: List[OllamaChatMessage]
     format: Optional[str] = None
     options: Optional[Dict[str, Any]] = None
-    stream: Optional[bool] = Field(default=False) # Ensure default for stream
+    stream: Optional[bool] = Field(default=False)
     template: Optional[str] = None
     keep_alive: Optional[Union[str, float]] = None
 
@@ -219,7 +219,7 @@ class OllamaChatCompletion(BaseModel):
     id: str = Field(default_factory=lambda: f"chatcmpl-lucidunified-{os.urandom(10).hex()}")
     object: str = "chat.completion"
     created: int = Field(default_factory=lambda: int(datetime.now(timezone.utc).timestamp()))
-    model: str # Model name *this proxy used* for the backend call
+    model: str
     choices: List[OllamaChatResponseChoice]
     usage: Dict[str, int] = Field(default_factory=lambda: {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0})
 
@@ -244,34 +244,71 @@ async def ollama_compatible_chat_proxy(request: OllamaChatRequest):
         raise HTTPException(status_code=400, detail="Last message must be from 'user' and non-empty.")
 
     try:
-        candidates = retriever_for_proxy.retrieve_by_keyword(user_message_content)
-        best_nodes = retriever_for_proxy.reflect_on_candidates(candidates, user_message_content)
-        logger.info(f"Proxy: Retrieved {len(best_nodes)} relevant nodes (from {len(candidates)} candidates).")
+        # Step 1: Initial keyword-based retrieval
+        keyword_candidates = retriever_for_proxy.retrieve_by_keyword(user_message_content)
+        logger.info(f"Proxy: Initial keyword retrieval found {len(keyword_candidates)} candidates.")
+
+        # Step 2: Reflect/Rank initial candidates (optional, but good to keep)
+        # This helps select the best starting points for graph traversal.
+        best_initial_nodes = retriever_for_proxy.reflect_on_candidates(keyword_candidates, user_message_content)
+        logger.info(f"Proxy: Reflected on candidates, selected {len(best_initial_nodes)} best initial nodes.")
+
+        # Step 3: Expand context using GraphRAG (if there are initial nodes)
+        if best_initial_nodes:
+            # Define max_neighbors for GraphRAG - this is the total nodes you want in the end
+            # It should be less than or equal to the display limit later.
+            max_graph_context_nodes = 7  # How many related nodes to pull in total
+            final_context_nodes = retriever_for_proxy.retrieve_graph_context(
+                best_initial_nodes,
+                user_message_content,
+                max_neighbors_to_include=max_graph_context_nodes
+            )
+            logger.info(f"Proxy: GraphRAG expanded to {len(final_context_nodes)} contextual nodes.")
+        else:
+            final_context_nodes = []  # No initial nodes, so no graph context
+            logger.info("Proxy: No initial nodes found, skipping GraphRAG expansion.")
+
+        # `best_nodes` will now be `final_context_nodes` for prompt construction
+        nodes_for_prompt = final_context_nodes
+
     except Exception as retrieve_err:
-        logger.error(f"Proxy: Memory retrieval failed: {retrieve_err}", exc_info=True)
-        best_nodes = []
+        logger.error(f"Proxy: Full retrieval pipeline (Keyword + GraphRAG) failed: {retrieve_err}", exc_info=True)
+        nodes_for_prompt = []
 
     memory_prompt_section = ""
-    if best_nodes:
-        memory_bits = ["Relevant Memories (max 5 shown):"]
-        for i, node in enumerate(best_nodes[:5], 1): # Limit context injection
+    if nodes_for_prompt:
+        # You might want to adjust the limit here if retrieve_graph_context already limits
+        # Or ensure the display limit here is consistent with what GraphRAG might return
+        display_limit_in_prompt = 5  # How many of the final nodes to actually put in the prompt
+
+        memory_bits = [f"Relevant Memories (max {display_limit_in_prompt} of {len(nodes_for_prompt)} shown, prioritized by relevance/structure):"]
+
+        # The nodes_for_prompt might already be sorted by retrieve_graph_context.
+        # If not, you might want a simple sort here, e.g., by sequence index if that makes sense for the context.
+        for i, node in enumerate(nodes_for_prompt[:display_limit_in_prompt], 1):
+            # ... (the rest of the node_info construction remains the same) ...
             node_info = [f"--- Memory {i} (ID: {node.id}) ---"]
-            if node.sequence_index is not None: node_info.append(f"[Seq: {node.sequence_index}, Parent: {node.parent_identifier}]")
+            if node.sequence_index is not None:
+                node_info.append(f"[Seq: {node.sequence_index}, Parent: {node.parent_identifier}]")
             node_info.append(f"Summary: {node.summary}")
-            if node.key_concepts: node_info.append("Key Concepts/Logic:\n" + "".join([f"- {c}\n" for c in node.key_concepts]))
-            if node.dependencies: node_info.append("Dependencies:\n" + "".join([f" -> {d}\n" for d in node.dependencies]))
-            if node.produced_outputs: node_info.append("Outputs:\n" + "".join([f" <- {o}\n" for o in node.produced_outputs]))
-            if node.tags: node_info.append(f"Tags: {', '.join(node.tags)}")
+            if node.key_concepts:
+                node_info.append("Key Concepts/Logic:\n" + "".join([f"- {c}\n" for c in node.key_concepts]))
+            if node.dependencies:
+                node_info.append("Dependencies:\n" + "".join([f" -> {d}\n" for d in node.dependencies]))
+            if node.produced_outputs:
+                node_info.append("Outputs:\n" + "".join([f" <- {o}\n" for o in node.produced_outputs]))
+            if node.tags:
+                node_info.append(f"Tags: {', '.join(node.tags)}")
             memory_bits.append("\n".join(node_info))
         memory_prompt_section = "\n\n".join(memory_bits) + "\n\n---\n\n"
     else:
-        memory_prompt_section = "(No relevant memories found for this query.)\n\n"
+        memory_prompt_section = "(No relevant memories found for this query after retrieval.)\n\n"
 
     final_user_prompt_for_backend = memory_prompt_section + f"Based ONLY on the memories provided, answer the following question:\nQuestion: {user_message_content}"
 
     # Use server_config for backend LLM details
     backend_llm_url = server_config.get("backend_url")
-    backend_llm_model = server_config.get("model_name") # This is the model the proxy uses for its backend
+    backend_llm_model = server_config.get("model_name")  # This is the model the proxy uses for its backend
     backend_api_key = server_config.get("api_key")
 
     if not backend_llm_url or not backend_llm_model:
@@ -290,7 +327,7 @@ async def ollama_compatible_chat_proxy(request: OllamaChatRequest):
             {"role": "user", "content": final_user_prompt_for_backend}
         ],
         "temperature": temperature,
-        "stream": False # Proxy sends non-streamed request to backend
+        "stream": False
     }
 
     backend_headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
@@ -298,14 +335,13 @@ async def ollama_compatible_chat_proxy(request: OllamaChatRequest):
         backend_headers['Authorization'] = f"Bearer {backend_api_key}"
 
     logger.info(f"Proxy->Backend Request: Target='{backend_llm_url}', Model='{backend_llm_model}'")
-    if logger.isEnabledFor(logging.DEBUG): # Avoids string formatting if not debug
+    if logger.isEnabledFor(logging.DEBUG):  # Avoids string formatting if not debug
         logger.debug(f"Proxy->Backend Headers: { {k: (v if k != 'Authorization' else 'Bearer ***') for k,v in backend_headers.items()} }")
         logger.debug(f"Proxy->Backend Payload: {json.dumps(backend_payload, indent=2)}")
 
-
     assistant_content = "Error: Proxy failed to get response from backend LLM."
     try:
-        import requests # Keep import local to where it's used if it's heavy
+        import requests  # Keep import local to where it's used if it's heavy
         backend_response = requests.post(backend_llm_url, json=backend_payload, headers=backend_headers, timeout=120)
         backend_response.raise_for_status()
         backend_data = backend_response.json()
@@ -326,13 +362,13 @@ async def ollama_compatible_chat_proxy(request: OllamaChatRequest):
         resp_text = getattr(e.response, 'text', '')[:200]
         err_detail = f"Proxy->Backend communication error: {e.__class__.__name__} for {backend_llm_url} | Status: {status} | Resp: {resp_text}"
         logger.error(err_detail)
-        raise HTTPException(status_code=status if status >=400 else 502, detail=err_detail)
+        raise HTTPException(status_code=status if status >= 400 else 502, detail=err_detail)
     except Exception as e:
         logger.exception("Proxy: Unexpected error during backend call/parsing")
         raise HTTPException(status_code=500, detail=f"Internal proxy error: {str(e)}")
 
     return OllamaChatCompletion(
-        model=backend_llm_model, # Report the model the proxy used
+        model=backend_llm_model,
         choices=[OllamaChatResponseChoice(message=OllamaChatMessage(role="assistant", content=assistant_content))]
     )
 
@@ -343,9 +379,11 @@ app.include_router(router_llm_proxy)
 async def root():
     graph_last_modified = "N/A"
     if os.path.exists(MEMORY_GRAPH_PATH):
-        try: graph_last_modified = datetime.fromtimestamp(os.path.getmtime(MEMORY_GRAPH_PATH)).isoformat()
-        except Exception: pass
-    
+        try:
+            graph_last_modified = datetime.fromtimestamp(os.path.getmtime(MEMORY_GRAPH_PATH)).isoformat()
+        except Exception:
+            pass
+
     server_port_to_display = server_config.get("unified_server_port", 8081)
 
     return {
@@ -364,7 +402,7 @@ async def root():
 async def shutdown_event():
     logger.info("Lucid Memory Unified Server shutting down...")
     if lucid_controller:
-        lucid_controller.cleanup() # Perform controller cleanup (e.g., join threads if any were for UI)
+        lucid_controller.cleanup()
     logger.info("Cleanup complete. Goodbye!")
 
 # Note: For running this server, you'd typically use a runner script that calls uvicorn,
