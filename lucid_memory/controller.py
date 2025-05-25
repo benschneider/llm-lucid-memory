@@ -5,20 +5,11 @@ import subprocess
 import threading
 import logging
 import time
-from typing import List, Dict, Any, Optional, Callable, Tuple
-
-# --- Type Hinting & Imports ---
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from .managers.config_manager import ConfigManager
-    from .managers.component_manager import ComponentManager
-    from .managers.server_manager import ServerManager
-    from .digestor import Digestor
-    from .embedder import Embedder
-
+from typing import List, Dict, Any, Optional, Callable, Tuple, TYPE_CHECKING
+from .digestor import Digestor
+from .embedder import Embedder
 from .managers.config_manager import ConfigManager
 from .managers.component_manager import ComponentManager
-from .managers.server_manager import ServerManager
 from .memory_graph import MemoryGraph
 from .chunker import chunk_file, chunk as lib_chunk_content # Renamed to avoid conflict
 from .processor import ChunkProcessor
