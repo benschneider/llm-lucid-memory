@@ -1,5 +1,5 @@
 from collections import deque
-from typing import List, Optional
+from typing import List, Optional, Dict
 from lucid_memory.memory_graph import MemoryGraph
 from lucid_memory.memory_node import MemoryNode
 import re  # For keyword extraction if needed later
